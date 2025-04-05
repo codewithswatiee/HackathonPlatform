@@ -14,10 +14,12 @@
     "chart.js": "^4.4.1",
     "firebase": "^11.6.0",
     "framer-motion": "^10.16.4",
+    "lucide-react": "^0.487.0",
     "next": "14.0.3",
     "react": "^18.2.0",
     "react-chartjs-2": "^5.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "sass": "^1.86.3"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.21",
