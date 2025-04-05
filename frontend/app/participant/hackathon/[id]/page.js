@@ -1,14 +1,13 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { motion, useScroll, useTransform, useSpring, AnimatePresence } from 'framer-motion';
+import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 
 const HackathonDetails = ({ params }) => {
   const router = useRouter();
   const [expandedFaq, setExpandedFaq] = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
-  const [showApplyPopup, setShowApplyPopup] = useState(false);
   const scrollRef = useRef(null);
   const { scrollXProgress } = useScroll({ container: scrollRef });
   const pathLength = useSpring(scrollXProgress, { stiffness: 400, damping: 90 });
@@ -324,58 +323,14 @@ const HackathonDetails = ({ params }) => {
                     </div>
                   </div>
 
-                  {/* Apply Button with Popup */}
-                  <div className="relative">
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => setShowApplyPopup(true)}
-                      className="w-full py-3 bg-white text-black rounded-lg font-medium hover:bg-zinc-200 transition-colors"
-                    >
-                      Apply Now
-                    </motion.button>
-
-                    <AnimatePresence>
-                      {showApplyPopup && (
-                        <>
-                          <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="fixed inset-0 bg-black/50 z-40"
-                            onClick={() => setShowApplyPopup(false)}
-                          />
-                          <motion.div
-                            initial={{ opacity: 0, scale: 0.9, y: 10 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.9, y: 10 }}
-                            className="absolute bottom-full left-0 right-0 mb-2 bg-zinc-900 rounded-lg border border-zinc-800 overflow-hidden z-50"
-                          >
-                            <motion.button
-                              whileHover={{ backgroundColor: '#3b82f6' }}
-                              onClick={() => router.push(`/participant/hackathon/${params.id}/create-team`)}
-                              className="w-full px-4 py-3 text-left hover:bg-blue-600 transition-colors flex items-center space-x-2"
-                            >
-                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                              </svg>
-                              <span>Apply as Leader</span>
-                            </motion.button>
-                            <motion.button
-                              whileHover={{ backgroundColor: '#3b82f6' }}
-                              onClick={() => router.push(`/participant/hackathon/${params.id}/join-team`)}
-                              className="w-full px-4 py-3 text-left hover:bg-blue-600 transition-colors flex items-center space-x-2"
-                            >
-                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                              </svg>
-                              <span>Join a Team</span>
-                            </motion.button>
-                          </motion.div>
-                        </>
-                      )}
-                    </AnimatePresence>
-                  </div>
+                  {/* Apply Button */}
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="w-full py-3 bg-white text-black rounded-lg font-medium hover:bg-zinc-200 transition-colors"
+                  >
+                    Apply Now
+                  </motion.button>
 
                   {/* Back Button */}
                   <button

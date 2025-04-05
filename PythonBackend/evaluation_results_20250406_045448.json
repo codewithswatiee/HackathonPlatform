@@ -1,0 +1,62 @@
+[
+  {
+    "team_name": "Team Alpha",
+    "code_score": 6.5,
+    "innovation_score": 8.5,
+    "doc_score": 8.2,
+    "final_score": 7.62,
+    "lint_output": "Unexpected error in code evaluation: [WinError 5] Access is denied: './temp_repos/ColdEmailGenerator\\\\.git\\\\objects\\\\pack\\\\pack-3a845acab584e6dcaba7a70fcf6e3e8e1cfa8962.idx'",
+    "reasoning": {
+      "innovation": 8.5,
+      "documentation": "The documentation is comprehensive, well-structured, and includes clear instructions for setup and usage. The README effectively communicates the project's purpose and implementation details."
+    }
+  },
+  {
+    "team_name": "Team Beta",
+    "code_score": 7.2,
+    "innovation_score": 7.8,
+    "doc_score": 7.5,
+    "final_score": 7.49,
+    "lint_output": "Unexpected error in code evaluation: [WinError 5] Access is denied: './temp_repos/Savory-Restaurant-Website\\\\.git\\\\objects\\\\pack\\\\pack-527e7c39dbf10bd7d24c56db4a7a8ea8cb3d4e60.idx'",
+    "reasoning": {
+      "innovation": 7.8,
+      "documentation": "The documentation provides a good overview of the project but could benefit from more detailed API documentation and examples."
+    }
+  },
+  {
+    "team_name": "Team Gamma",
+    "code_score": 8.0,
+    "innovation_score": 9.2,
+    "doc_score": 9.0,
+    "final_score": 8.67,
+    "lint_output": "Unexpected error in code evaluation: [WinError 5] Access is denied: './temp_repos/live_project\\\\.git\\\\objects\\\\pack\\\\pack-989e248345d6d7b9f8b4fd4bd5e35358712a88c6.idx'",
+    "reasoning": {
+      "innovation": 9.2,
+      "documentation": "The README is exceptionally well-organized with clear sections for features, installation, and usage. The code examples are particularly helpful."
+    }
+  },
+  {
+    "team_name": "Team Delta",
+    "code_score": 5.8,
+    "innovation_score": 8.0,
+    "doc_score": 8.8,
+    "final_score": 7.32,
+    "lint_output": "Unexpected error in code evaluation: [WinError 5] Access is denied: './temp_repos/Student_record_angular\\\\.git\\\\objects\\\\pack\\\\pack-7c33d5bd963a6760ecfab3408154f901ec37e024.idx'",
+    "reasoning": {
+      "innovation": 8.0,
+      "documentation": "The documentation is thorough and user-friendly, with clear instructions for getting started. The supported devices section is particularly useful."
+    }
+  },
+  {
+    "team_name": "Team Epsilon",
+    "code_score": 6.0,
+    "innovation_score": 7.5,
+    "doc_score": 7.0,
+    "final_score": 6.78,
+    "lint_output": "Unexpected error in code evaluation: [WinError 5] Access is denied: './temp_repos/Lead_Gen\\\\.git\\\\objects\\\\pack\\\\pack-608876b0a16fd48a315f0b5f9c07afbc6f3ac9d3.idx'",
+    "reasoning": {
+      "innovation": 7.5,
+      "documentation": "The documentation covers the basic aspects of the project but lacks detailed technical information about the blockchain implementation."
+    }
+  }
+]

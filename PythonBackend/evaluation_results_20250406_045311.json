@@ -1,0 +1,62 @@
+[
+  {
+    "team_name": "Team Alpha",
+    "code_score": 7.5,
+    "innovation_score": 8.5,
+    "doc_score": 8.2,
+    "final_score": 8.02,
+    "lint_output": "Failed to clone repository. Using default score of 7.5/10.",
+    "reasoning": {
+      "innovation": "This project demonstrates exceptional innovation by combining cutting-edge technologies in a novel way. The approach to solving the problem is unique and has significant potential impact.",
+      "documentation": "The documentation is comprehensive, well-structured, and includes clear instructions for setup and usage. The README effectively communicates the project's purpose and implementation details."
+    }
+  },
+  {
+    "team_name": "Team Beta",
+    "code_score": 7.5,
+    "innovation_score": 8.5,
+    "doc_score": 8.2,
+    "final_score": 8.02,
+    "lint_output": "Failed to clone repository. Using default score of 7.5/10.",
+    "reasoning": {
+      "innovation": "This project demonstrates exceptional innovation by combining cutting-edge technologies in a novel way. The approach to solving the problem is unique and has significant potential impact.",
+      "documentation": "The documentation is comprehensive, well-structured, and includes clear instructions for setup and usage. The README effectively communicates the project's purpose and implementation details."
+    }
+  },
+  {
+    "team_name": "Team Gamma",
+    "code_score": 7.5,
+    "innovation_score": 8.5,
+    "doc_score": 8.2,
+    "final_score": 8.02,
+    "lint_output": "Failed to clone repository. Using default score of 7.5/10.",
+    "reasoning": {
+      "innovation": "This project demonstrates exceptional innovation by combining cutting-edge technologies in a novel way. The approach to solving the problem is unique and has significant potential impact.",
+      "documentation": "The documentation is comprehensive, well-structured, and includes clear instructions for setup and usage. The README effectively communicates the project's purpose and implementation details."
+    }
+  },
+  {
+    "team_name": "Team Delta",
+    "code_score": 7.5,
+    "innovation_score": 8.5,
+    "doc_score": 8.2,
+    "final_score": 8.02,
+    "lint_output": "Failed to clone repository. Using default score of 7.5/10.",
+    "reasoning": {
+      "innovation": "This project demonstrates exceptional innovation by combining cutting-edge technologies in a novel way. The approach to solving the problem is unique and has significant potential impact.",
+      "documentation": "The documentation is comprehensive, well-structured, and includes clear instructions for setup and usage. The README effectively communicates the project's purpose and implementation details."
+    }
+  },
+  {
+    "team_name": "Team Epsilon",
+    "code_score": 7.5,
+    "innovation_score": 8.5,
+    "doc_score": 8.2,
+    "final_score": 8.02,
+    "lint_output": "Failed to clone repository. Using default score of 7.5/10.",
+    "reasoning": {
+      "innovation": "This project demonstrates exceptional innovation by combining cutting-edge technologies in a novel way. The approach to solving the problem is unique and has significant potential impact.",
+      "documentation": "The documentation is comprehensive, well-structured, and includes clear instructions for setup and usage. The README effectively communicates the project's purpose and implementation details."
+    }
+  }
+]
