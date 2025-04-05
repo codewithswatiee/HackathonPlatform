@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "recharts": "^2.15.2"
     "@heroicons/react": "^2.2.0",
     "chart.js": "^4.4.8",
     "framer-motion": "^12.6.3",
