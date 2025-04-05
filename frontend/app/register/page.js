@@ -64,91 +64,103 @@ export default function OrganizerRegistration() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-black text-white py-12 px-4 sm:px-6 lg:px-8">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="max-w-2xl mx-auto"
+        className="max-w-3xl mx-auto bg-zinc-900 rounded-lg shadow-lg p-8 border border-zinc-800"
       >
-        <Card className="w-full">
-          <CardHeader>
-            <CardTitle className="text-3xl text-center">Organizer Registration</CardTitle>
-            <CardDescription className="text-center">
-              Create your organizer account to start hosting hackathons
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-4">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold">Organizer Registration</h2>
+          <p className="mt-2 text-zinc-400">Create your organizer account to start hosting hackathons</p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="space-y-6"
+          >
+            <motion.div variants={itemVariants} className="space-y-6">
+              <h3 className="text-xl font-semibold border-b border-zinc-800 pb-2">Personal Information</h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                  <label className="block text-sm font-medium text-zinc-300">Full Name *</label>
                   <input
                     type="text"
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
                     required
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                    className="mt-1 block w-full rounded-md bg-zinc-800 border-zinc-700 text-white shadow-sm focus:border-white focus:ring-white"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                  <label className="block text-sm font-medium text-zinc-300">Username *</label>
                   <input
                     type="text"
                     name="username"
                     value={formData.username}
                     onChange={handleChange}
                     required
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                    className="mt-1 block w-full rounded-md bg-zinc-800 border-zinc-700 text-white shadow-sm focus:border-white focus:ring-white"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                  <label className="block text-sm font-medium text-zinc-300">Password *</label>
                   <input
                     type="password"
                     name="password"
                     value={formData.password}
                     onChange={handleChange}
                     required
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                    className="mt-1 block w-full rounded-md bg-zinc-800 border-zinc-700 text-white shadow-sm focus:border-white focus:ring-white"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+                  <label className="block text-sm font-medium text-zinc-300">Confirm Password *</label>
                   <input
                     type="password"
                     name="confirmPassword"
                     value={formData.confirmPassword}
                     onChange={handleChange}
                     required
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                    className="mt-1 block w-full rounded-md bg-zinc-800 border-zinc-700 text-white shadow-sm focus:border-white focus:ring-white"
                   />
                 </div>
+              </div>
+            </motion.div>
 
+            <motion.div variants={itemVariants} className="space-y-6">
+              <h3 className="text-xl font-semibold border-b border-zinc-800 pb-2">Organization Details</h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Organization Name</label>
+                  <label className="block text-sm font-medium text-zinc-300">Organization Name *</label>
                   <input
                     type="text"
                     name="organizationName"
                     value={formData.organizationName}
                     onChange={handleChange}
                     required
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                    className="mt-1 block w-full rounded-md bg-zinc-800 border-zinc-700 text-white shadow-sm focus:border-white focus:ring-white"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Organization Type</label>
+                  <label className="block text-sm font-medium text-zinc-300">Organization Type *</label>
                   <select
                     name="organizationType"
                     value={formData.organizationType}
                     onChange={handleChange}
                     required
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                    className="mt-1 block w-full rounded-md bg-zinc-800 border-zinc-700 text-white shadow-sm focus:border-white focus:ring-white"
                   >
                     <option value="">Select Organization Type</option>
                     <option value="educational">Educational Institution</option>
@@ -159,35 +171,42 @@ export default function OrganizerRegistration() {
                   </select>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Organization Description</label>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-zinc-300">Organization Description *</label>
                   <textarea
                     name="description"
                     value={formData.description}
                     onChange={handleChange}
                     required
                     rows="4"
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                    className="mt-1 block w-full rounded-md bg-zinc-800 border-zinc-700 text-white shadow-sm focus:border-white focus:ring-white"
                   />
                 </div>
               </div>
-            </form>
-          </CardContent>
-          <CardFooter className="flex justify-end space-x-4">
-            <Button
-              variant="outline"
+            </motion.div>
+          </motion.div>
+
+          <div className="flex justify-between pt-6 border-t border-zinc-800">
+            <motion.button
+              type="button"
               onClick={() => router.push('/')}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="px-6 py-2 border border-zinc-700 rounded-md text-sm font-medium text-white hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-zinc-900 focus:ring-white"
             >
               Cancel
-            </Button>
-            <Button
+            </motion.button>
+            
+            <motion.button
               type="submit"
-              onClick={handleSubmit}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-black bg-white hover:bg-zinc-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-zinc-900 focus:ring-white"
             >
               Register
-            </Button>
-          </CardFooter>
-        </Card>
+            </motion.button>
+          </div>
+        </form>
       </motion.div>
     </div>
   )

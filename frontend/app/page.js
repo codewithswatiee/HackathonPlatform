@@ -17,7 +17,7 @@ export default function Home() {
       title: 'Participate',
       description: 'Join exciting hackathons and showcase your skills',
       icon: '👥',
-      path: '/participant-register'
+      path: '/participant/register'
     },
     {
       title: 'Become a Mentor',
