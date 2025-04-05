@@ -6,6 +6,11 @@ const participantSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    username:{
+        type: String,
+        required: true,
+        unique: true,
+    },
     email: {
         type: String,
         required: true,
@@ -17,7 +22,6 @@ const participantSchema = new mongoose.Schema({
     },
     phone: {
         type: String,
-        required: true
     },
     profilePicture: {
         type: String,
@@ -40,7 +44,7 @@ const participantSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    qualification: {
+    skills: {
         type: String,
         required: true
     },
@@ -52,18 +56,41 @@ const participantSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    collegeName: {
+    organization: {
         type: String,
-        required: function() { return this.isStudent; }
-    },
-    companyName: {
-        type: String,
-        required: function() { return !this.isStudent; }
-    },
-    isStudent: {
-        type: Boolean,
         required: true
-    }
+    },
+    feildOfInterest:{
+        type: [String],
+        required: true,
+        enum: [
+            'Web Development',
+            'Mobile Development',
+            'Data Science',
+            'Machine Learning',
+            'AI',
+            'Cyber Security',
+            'Cloud Computing',
+            'DevOps',
+            'Blockchain',
+            'Game Development'
+        ],
+        required: true
+    },
+    bio:{
+        type: String,
+        required: true
+    },
+    city:{
+        type: String,
+        required: true
+    },
+    country:{
+        type: String,
+    },
+    resume: {
+        type: String,
+    },
 });
 
 // Index for faster queries

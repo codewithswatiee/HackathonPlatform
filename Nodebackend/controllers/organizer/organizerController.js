@@ -1,11 +1,13 @@
 const Organizer = require('../../models/organizer');
 const bcrypt = require('bcryptjs');
+const Participant = require('../../models/participant');
 
 // Validation function for organizer registration
 const validateOrganizerData = (data) => {
     const requiredFields = [
         'name',
         'email',
+        'username',
         'password',
         'organizationType',
         'organizationName',
@@ -40,12 +42,12 @@ const registerOrganizer = async (req, res) => {
     try {
         const {
             name,
+            username,
             email,
             password,
             organizationType,
             organizationName,
             description,
-            profilePicture
         } = req.body;
 
         // Validate input data
@@ -61,6 +63,24 @@ const registerOrganizer = async (req, res) => {
             });
         }
 
+        const existingUsername = await Organizer.findOne({username});
+        if(existingUsername){
+            return res.status(400).json({ 
+                success: false,
+                message: 'Username already exists',
+                error: 'DUPLICATE_Username'
+            });
+        }
+
+        const existing_username = await Participant.findOne({username});
+        if(existing_username){
+            return res.status(400).json({ 
+                success: false,
+                message: 'Username already exists',
+                error: 'DUPLICATE_Username'
+            });
+        }        
+
         // Hash password
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
@@ -69,11 +89,11 @@ const registerOrganizer = async (req, res) => {
         const newOrganizer = new Organizer({
             name,
             email,
+            username,
             password: hashedPassword,
             organizationType,
             organizationName,
             description,
-            profilePicture
         });
 
         // Save organizer

@@ -5,15 +5,19 @@ const bcrypt = require('bcryptjs');
 const validateParticipantData = (data) => {
     const requiredFields = [
         'name',
+        'username',
         'email',
         'password',
-        'phone',
         'age',
         'experience',
-        'qualification',
+        'skills',
         'githubLink',
         'linkedIn',
-        'isStudent'
+        'organization',
+        'feildOfInterest',
+        'bio',
+        'city',
+        'country',
     ];
 
     const missingFields = requiredFields.filter(field => !data[field]);
@@ -25,12 +29,6 @@ const validateParticipantData = (data) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(data.email)) {
         throw new Error('Invalid email format');
-    }
-
-    // Validate phone number format (basic validation)
-    const phoneRegex = /^\+?[\d\s-]{10,}$/;
-    if (!phoneRegex.test(data.phone)) {
-        throw new Error('Invalid phone number format');
     }
 
     // Validate age
@@ -47,12 +45,21 @@ const validateParticipantData = (data) => {
         throw new Error('Invalid LinkedIn URL');
     }
 
-    // Validate student/professional specific fields
-    if (data.isStudent && !data.collegeName) {
-        throw new Error('College name is required for students');
-    }
-    if (!data.isStudent && !data.companyName) {
-        throw new Error('Company name is required for professionals');
+    // Validate field of interest (array of strings)
+    const validFieldsOfInterest = [
+        'Web Development',
+        'Mobile Development',
+        'Data Science',
+        'Machine Learning',
+        'AI',
+        'Cyber Security',
+        'Cloud Computing',
+        'DevOps',
+        'Blockchain',
+        'Game Development'
+    ];
+    if (!Array.isArray(data.feildOfInterest) || data.feildOfInterest.length === 0) {
+        throw new Error('Field of interest must be a non-empty array');
     }
 };
 
@@ -61,18 +68,24 @@ const registerParticipant = async (req, res) => {
     try {
         const {
             name,
+            username,
             email,
             password,
             phone,
             age,
             experience,
-            qualification,
+            skills,
             githubLink,
             linkedIn,
-            collegeName,
-            companyName,
-            isStudent
+            organization,
+            feildOfInterest,
+            bio,
+            city,
+            country,
+            resume
         } = req.body;
+
+        console.log('Request body:', req.body);
 
         // Validate input data
         validateParticipantData(req.body);
@@ -87,6 +100,16 @@ const registerParticipant = async (req, res) => {
             });
         }
 
+        // Check if username already exists
+        const existingUsername = await Participant.findOne({ username });
+        if (existingUsername) {
+            return res.status(400).json({
+                success: false,
+                message: 'Username already exists',
+                error: 'DUPLICATE_USERNAME'
+            });
+        }
+
         // Hash password
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
@@ -94,18 +117,24 @@ const registerParticipant = async (req, res) => {
         // Create new participant
         const newParticipant = new Participant({
             name,
+            username,
             email,
             password: hashedPassword,
             phone,
             age,
             experience,
-            qualification,
+            skills,
             githubLink,
             linkedIn,
-            collegeName,
-            companyName,
-            isStudent
+            organization,
+            feildOfInterest,
+            bio,
+            city,
+            country,
+            resume
         });
+
+
 
         // Save participant
         await newParticipant.save();
@@ -326,4 +355,4 @@ module.exports = {
     getParticipantById,
     updateParticipant,
     deleteParticipant
-}; 
+};
