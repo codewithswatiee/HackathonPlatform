@@ -1,119 +1,196 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, useScroll, useTransform, useSpring, AnimatePresence } from 'framer-motion';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
+import axios from 'axios';
 
-const HackathonDetails = ({ params }) => {
+// Add this CSS class at the top of your file
+const scrollbarHideStyles = `
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+`;
+
+const HackathonDetails = () => {
   const router = useRouter();
+  const pathname = usePathname();
   const [expandedFaq, setExpandedFaq] = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
   const [showApplyPopup, setShowApplyPopup] = useState(false);
+  const [hackathon, setHackathon] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [countdown, setCountdown] = useState({
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0
+  });
   const scrollRef = useRef(null);
   const { scrollXProgress } = useScroll({ container: scrollRef });
   const pathLength = useSpring(scrollXProgress, { stiffness: 400, damping: 90 });
 
-  // Sample data - replace with API call using params.id
-  const hackathon = {
-    id: params.id,
-    name: 'AI Innovation Hackathon',
-    description: 'Join us for an exciting hackathon focused on artificial intelligence and machine learning innovations. Build cutting-edge solutions that leverage AI to solve real-world problems.',
-    theme: 'Artificial Intelligence for Social Good',
-    rules: [
-      'Teams must consist of 2-4 members',
-      'All code must be original and created during the hackathon',
-      'Use of open-source libraries is allowed',
-      'Projects must be submitted before the deadline',
-      'Each team will have 5 minutes for presentation'
-    ],
+  useEffect(() => {
+    const fetchHackathonDetails = async () => {
+      try {
+        // Get hackathonId from pathname
+        const hackathonId = pathname.split('/').pop();
+
+        console.log(hackathonId)
+        
+        const response = await axios.get(`http://localhost:7000/api/organizers/hackathons/${hackathonId}`);
+        if (response.data) {
+          const hackathonData = response.data.hackathon;
+          setHackathon({
+            id: hackathonData._id,
+            name: hackathonData.name,
+            description: hackathonData.description,
+            theme: hackathonData.theme,
+            rules: hackathonData.rules,
     prizes: {
-      first: '₹50,000',
-      second: '₹30,000',
-      third: '₹20,000'
-    },
-    registrationFee: '₹500 per team',
-    teamSize: '2-4 members',
-    date: '2024-05-15',
-    time: '9:00 AM IST',
-    venue: 'Virtual Event',
-    applicationDeadline: '2024-05-01',
-    faqs: [
-      {
-        question: 'What should I bring to the hackathon?',
-        answer: 'For virtual participation, you need a computer with stable internet connection, required software tools, and your creativity!'
-      },
-      {
-        question: 'Is there a specific theme I need to follow?',
-        answer: 'Yes, all projects should align with the theme of AI for Social Good. Specific problem statements will be provided at the start.'
-      },
-      {
-        question: 'How will the judging be conducted?',
-        answer: 'Projects will be judged based on innovation, technical complexity, practical applicability, and presentation quality.'
-      },
-      {
-        question: 'Are there any prerequisites?',
-        answer: 'Basic programming knowledge and familiarity with AI/ML concepts is recommended but not mandatory.'
+              first: `₹${hackathonData.prizeDistribution[0].amount}`,
+              second: `₹${hackathonData.prizeDistribution[1].amount}`,
+              third: `₹${hackathonData.prizeDistribution[2].amount}`
+            },
+            registrationFee: `₹${hackathonData.registrationFee} per team`,
+            teamSize: `${hackathonData.minTeamSize}-${hackathonData.maxTeamSize} members`,
+            date: new Date(hackathonData.startDate).toISOString(),
+            time: hackathonData.time.startTime,
+            venue: hackathonData.location.type,
+            applicationDeadline: new Date(hackathonData.registrationEndDate).toISOString(),
+            schedule: [
+              {
+                phase: 'Registration Opens',
+                date: new Date(hackathonData.registrationStartDate).toISOString(),
+                time: hackathonData.time.startTime,
+                status: new Date() < new Date(hackathonData.registrationStartDate) ? 'upcoming' : 'completed',
+                description: 'Team registration period begins'
+              },
+              {
+                phase: 'Registration Deadline',
+                date: new Date(hackathonData.registrationEndDate).toISOString(),
+                time: hackathonData.time.endTime,
+                status: new Date() < new Date(hackathonData.registrationEndDate) ? 'upcoming' : 'completed',
+                description: 'Last date to register your team'
+              },
+              {
+                phase: 'Hackathon Begins',
+                date: new Date(hackathonData.startDate).toISOString(),
+                time: hackathonData.time.startTime,
+                status: new Date() < new Date(hackathonData.startDate) ? 'upcoming' : 'completed',
+                description: `${hackathonData.duration} hackathon begins`
+              },
+              {
+                phase: 'Hackathon Ends',
+                date: new Date(hackathonData.endDate).toISOString(),
+                time: hackathonData.time.endTime,
+                status: new Date() < new Date(hackathonData.endDate) ? 'upcoming' : 'completed',
+                description: 'Project submissions and presentations'
+              }
+            ],
+            faqs: [
+              {
+                question: 'What is the team size requirement?',
+                answer: `Teams must have between ${hackathonData.minTeamSize} and ${hackathonData.maxTeamSize} members.`
+              },
+              {
+                question: 'What are the judging criteria?',
+                answer: hackathonData.judgingCriteria.map(criteria => 
+                  `${criteria.criterion} (${criteria.weightage}%)`
+                ).join(', ')
+              },
+              {
+                question: 'What domains are covered?',
+                answer: `This hackathon covers the following domains: ${hackathonData.domains.join(', ')}`
+              },
+              {
+                question: 'What is the prize distribution?',
+                answer: `Total prize pool of ₹${hackathonData.prizePool}. ${hackathonData.prizeDistribution.map(prize => 
+                  `${prize.position}: ₹${prize.amount}`
+                ).join(', ')}`
+              }
+            ],
+            status: hackathonData.status,
+            participants: hackathonData.participants || 0,
+            duration: hackathonData.duration,
+            domains: hackathonData.domains,
+            judgingCriteria: hackathonData.judgingCriteria,
+            startDate: new Date(hackathonData.startDate),
+            endDate: new Date(hackathonData.endDate),
+            registrationStartDate: new Date(hackathonData.registrationStartDate),
+            registrationEndDate: new Date(hackathonData.registrationEndDate)
+          });
+        }
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching hackathon details:', error);
+        setLoading(false);
       }
-    ],
-    schedule: [
-      {
-        phase: 'Registration',
-        date: '2024-04-15',
-        time: '09:00 AM IST',
-        status: 'current',
-        description: 'Team registration opens'
-      },
-      {
-        phase: 'Ideation',
-        date: '2024-04-20',
-        time: '10:00 AM IST',
-        status: 'upcoming',
-        description: 'Problem statement release and ideation phase begins'
-      },
-      {
-        phase: 'Development Kickoff',
-        date: '2024-05-15',
-        time: '09:00 AM IST',
-        status: 'upcoming',
-        description: 'Hackathon begins with opening ceremony'
-      },
-      {
-        phase: 'Mentorship Sessions',
-        date: '2024-05-15',
-        time: '02:00 PM IST',
-        status: 'upcoming',
-        description: 'One-on-one mentorship sessions with industry experts'
-      },
-      {
-        phase: 'Mid-Review',
-        date: '2024-05-16',
-        time: '10:00 AM IST',
-        status: 'upcoming',
-        description: 'Progress check and feedback from mentors'
-      },
-      {
-        phase: 'Final Submissions',
-        date: '2024-05-17',
-        time: '08:00 AM IST',
-        status: 'upcoming',
-        description: 'Project submission deadline'
-      },
-      {
-        phase: 'Presentations',
-        date: '2024-05-17',
-        time: '02:00 PM IST',
-        status: 'upcoming',
-        description: 'Team presentations and demos'
-      },
-      {
-        phase: 'Awards Ceremony',
-        date: '2024-05-17',
-        time: '06:00 PM IST',
-        status: 'upcoming',
-        description: 'Winners announcement and closing ceremony'
-      }
-    ]
-  };
+    };
+
+    fetchHackathonDetails();
+  }, [pathname]);
+
+
+  useEffect(() => {
+    if (hackathon) {
+      const timer = setInterval(() => {
+        const now = new Date().getTime();
+        const registrationEnd = new Date(hackathon.registrationEndDate).getTime();
+        const distance = registrationEnd - now;
+
+        if (distance < 0) {
+          clearInterval(timer);
+          setCountdown({
+            days: 0,
+            hours: 0,
+            minutes: 0,
+            seconds: 0
+          });
+        } else {
+          setCountdown({
+            days: Math.floor(distance / (1000 * 60 * 60 * 24)),
+            hours: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+            minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
+            seconds: Math.floor((distance % (1000 * 60)) / 1000)
+          });
+        }
+      }, 1000);
+
+      return () => clearInterval(timer);
+    }
+  }, [hackathon]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-t-4 border-blue-500 border-solid rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-xl">Loading hackathon details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!hackathon) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4">Hackathon not found</h2>
+          <button
+            onClick={() => router.back()}
+            className="px-6 py-3 bg-white text-black rounded-lg font-medium hover:bg-zinc-200 transition-colors"
+          >
+            Back to Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   // Calculate time remaining
   const deadline = new Date(hackathon.applicationDeadline);
@@ -141,14 +218,7 @@ const HackathonDetails = ({ params }) => {
         {/* Container for horizontal scroll */}
         <div 
           ref={scrollRef}
-          className="overflow-x-auto overflow-y-hidden pb-8"
-          style={{ 
-            scrollbarWidth: 'none',
-            msOverflowStyle: 'none',
-            '&::-webkit-scrollbar': {
-              display: 'none'
-            }
-          }}
+          className="overflow-x-auto overflow-y-hidden pb-8 hide-scrollbar"
         >
           <div className="relative min-w-max pb-12 pt-8">
             {/* Glowing Path */}
@@ -282,6 +352,9 @@ const HackathonDetails = ({ params }) => {
 
   return (
     <div className="min-h-screen bg-black text-white">
+      {/* Add the style tag for scrollbar hiding */}
+      <style>{scrollbarHideStyles}</style>
+      
       <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
         {/* Top Header Box */}
         <motion.div 
@@ -310,16 +383,39 @@ const HackathonDetails = ({ params }) => {
                     <h3 className="text-lg font-semibold mb-4">Event Timeline</h3>
                     <div className="space-y-4">
                       <div>
-                        <p className="text-zinc-400">When</p>
-                        <p className="font-medium">{new Date(hackathon.date).toLocaleDateString()} at {hackathon.time}</p>
+                        <p className="text-zinc-400">Event Duration</p>
+                        <p className="font-medium">{hackathon.duration}</p>
                       </div>
                       <div>
-                        <p className="text-zinc-400">Where</p>
-                        <p className="font-medium">{hackathon.venue}</p>
+                        <p className="text-zinc-400">Event Dates</p>
+                        <p className="font-medium">
+                          {new Date(hackathon.startDate).toLocaleDateString()} - {new Date(hackathon.endDate).toLocaleDateString()}
+                        </p>
                       </div>
                       <div>
-                        <p className="text-zinc-400">Application Closes In</p>
-                        <p className="font-medium">{daysRemaining} days</p>
+                        <p className="text-zinc-400">Location</p>
+                        <p className="font-medium capitalize">{hackathon.venue}</p>
+                      </div>
+                      <div>
+                        <p className="text-zinc-400">Registration Closes In</p>
+                        <div className="grid grid-cols-4 gap-2 mt-2">
+                          <div className="bg-zinc-800 p-2 rounded-lg text-center">
+                            <div className="text-xl font-bold">{countdown.days}</div>
+                            <div className="text-xs text-zinc-400">Days</div>
+                          </div>
+                          <div className="bg-zinc-800 p-2 rounded-lg text-center">
+                            <div className="text-xl font-bold">{countdown.hours}</div>
+                            <div className="text-xs text-zinc-400">Hours</div>
+                          </div>
+                          <div className="bg-zinc-800 p-2 rounded-lg text-center">
+                            <div className="text-xl font-bold">{countdown.minutes}</div>
+                            <div className="text-xs text-zinc-400">Minutes</div>
+                          </div>
+                          <div className="bg-zinc-800 p-2 rounded-lg text-center">
+                            <div className="text-xl font-bold">{countdown.seconds}</div>
+                            <div className="text-xs text-zinc-400">Seconds</div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -353,7 +449,7 @@ const HackathonDetails = ({ params }) => {
                           >
                             <motion.button
                               whileHover={{ backgroundColor: '#3b82f6' }}
-                              onClick={() => router.push(`/participant/hackathon/${params.id}/create-team`)}
+                              onClick={() => router.push(`/participant/hackathon/${pathname.split('/').pop()}/create-team`)}
                               className="w-full px-4 py-3 text-left hover:bg-blue-600 transition-colors flex items-center space-x-2"
                             >
                               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -363,7 +459,7 @@ const HackathonDetails = ({ params }) => {
                             </motion.button>
                             <motion.button
                               whileHover={{ backgroundColor: '#3b82f6' }}
-                              onClick={() => router.push(`/participant/hackathon/${params.id}/join-team`)}
+                              onClick={() => router.push(`/participant/hackathon/${pathname.split('/').pop()}/join-team`)}
                               className="w-full px-4 py-3 text-left hover:bg-blue-600 transition-colors flex items-center space-x-2"
                             >
                               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -391,16 +487,8 @@ const HackathonDetails = ({ params }) => {
             {/* Right Section - Scrollable */}
             <div>
               <div 
-                className="space-y-8 pr-4" 
-                style={{ 
-                  height: 'calc(100vh - 20rem)',
-                  overflowY: 'auto',
-                  scrollbarWidth: 'none',
-                  msOverflowStyle: 'none',
-                  '&::-webkit-scrollbar': {
-                    display: 'none'
-                  }
-                }}
+                className="space-y-8 pr-4 overflow-y-auto hide-scrollbar" 
+                style={{ height: 'calc(100vh - 20rem)' }}
               >
                 {/* Theme */}
                 <div className="bg-zinc-900 rounded-xl p-6 border border-zinc-800">

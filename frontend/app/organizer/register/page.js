@@ -3,6 +3,7 @@
 import { motion } from "framer-motion"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
+import axios from "axios"
 
 export default function OrganizerRegistration() {
   const router = useRouter()
@@ -14,6 +15,7 @@ export default function OrganizerRegistration() {
     organizationName: "",
     organizationType: "",
     description: "",
+    email: ""
   })
 
   const handleChange = (e) => {
@@ -32,10 +34,23 @@ export default function OrganizerRegistration() {
       return
     }
 
-    // Here you would typically send the data to your backend
-    console.log("Form submitted:", formData)
-    // After successful registration, redirect to the dashboard
-    router.push("/organizer/dashboard")
+    const response = await axios.post('http://localhost:7000/api/organizers/register', {
+      name: formData.name,
+      email: formData.email,
+      username: formData.username,
+      password: formData.password,
+      organizationName: formData.organizationName,
+      organizationType: formData.organizationType,
+      description: formData.description,
+    })
+
+    if(response.status === 201) {
+      alert("Registration successful!")
+      router.push("/organizer/dashboard")
+    } else {
+      alert("Registration failed! Please try again later!")
+
+    }
   }
 
   const containerVariants = {
@@ -102,6 +117,18 @@ export default function OrganizerRegistration() {
                 </div>
 
                 <div>
+                  <label className="block text-sm font-medium text-zinc-300">Email *</label>
+                  <input
+                    type="text"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                    className="mt-1 block w-full rounded-md bg-zinc-800 border-zinc-700 text-white shadow-sm focus:border-white focus:ring-white"
+                  />
+                </div>
+
+                <div>
                   <label className="block text-sm font-medium text-zinc-300">Password *</label>
                   <input
                     type="password"
@@ -153,10 +180,9 @@ export default function OrganizerRegistration() {
                     className="mt-1 block w-full rounded-md bg-zinc-800 border-zinc-700 text-white shadow-sm focus:border-white focus:ring-white"
                   >
                     <option value="">Select Organization Type</option>
-                    <option value="educational">Educational Institution</option>
-                    <option value="corporate">Corporate</option>
-                    <option value="nonprofit">Non-Profit</option>
-                    <option value="government">Government</option>
+                    <option value="company">Company</option>
+                    <option value="college">College</option>
+                    <option value="committee">Committee</option>
                     <option value="other">Other</option>
                   </select>
                 </div>
@@ -191,6 +217,7 @@ export default function OrganizerRegistration() {
               type="submit"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
+              onClick={handleSubmit}
               className="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-black bg-white hover:bg-zinc-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-zinc-900 focus:ring-white"
             >
               Register

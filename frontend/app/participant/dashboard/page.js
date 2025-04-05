@@ -4,47 +4,60 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, useScroll, useTransform, useSpring, useAnimationFrame } from 'framer-motion';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { useRouter } from 'next/navigation';
+import axios from 'axios';
+import { useSelector } from 'react-redux';
+import { selectCurrentUser } from '@/redux/features/authSlice';
 
 const ParticipantDashboard = () => {
   const router = useRouter();
+  const user = useSelector(selectCurrentUser)
+  console.log(user)
+  const [hackathons, setHackathons] = useState([]);
 
-  const [hackathons, setHackathons] = useState([
-    // Sample data - replace with actual API call
-    {
-      id: 1,
-      title: 'AI Innovation Hackathon',
-      date: '2024-05-15',
-      location: 'Virtual',
-      description: 'A hackathon focused on artificial intelligence and machine learning innovations.',
-      status: 'Open',
-      points: 100,
-      participants: 120,
-      difficulty: 'Intermediate',
-    },
-    {
-      id: 2,
-      title: 'Web3 Development Challenge',
-      date: '2024-06-01',
-      location: 'Hybrid',
-      description: 'Build the future of decentralized applications.',
-      status: 'Coming Soon',
-      points: 150,
-      participants: 85,
-      difficulty: 'Advanced',
-    },
-    {
-      id: 3,
-      title: 'Mobile App Creation',
-      date: '2024-07-10',
-      location: 'In-Person',
-      description: 'Design and develop innovative mobile applications.',
-      status: 'Open',
-      points: 80,
-      participants: 95,
-      difficulty: 'Beginner',
-    },
-    // Add more sample hackathons as needed
-  ]);
+  // Add useEffect for fetching hackathons
+  useEffect(() => {
+    const fetchHackathons = async () => {
+      try {
+        const response = await axios.get('http://localhost:7000/api/organizers/hackathons');
+        if (response.data) {
+          // Transform the data to match our frontend structure
+          const transformedHackathons = response.data?.hackathons.map(hackathon => ({
+            id: hackathon._id,
+            title: hackathon.name,
+            date: new Date(hackathon.startDate).toISOString().split('T')[0],
+            location: hackathon.location.type,
+            description: hackathon.description,
+            status: hackathon.status,
+            points: hackathon.prizePool,
+            participants: 0,
+            difficulty: hackathon.domains.length > 3 ? 'Advanced' : hackathon.domains.length > 1 ? 'Intermediate' : 'Beginner',
+            theme: hackathon.theme,
+            startDate: new Date(hackathon.startDate),
+            endDate: new Date(hackathon.endDate),
+            registrationStartDate: new Date(hackathon.registrationStartDate),
+            registrationEndDate: new Date(hackathon.registrationEndDate),
+            duration: hackathon.duration,
+            time: hackathon.time,
+            registrationFee: hackathon.registrationFee,
+            prizeDistribution: hackathon.prizeDistribution,
+            domains: hackathon.domains,
+            maxTeamSize: hackathon.maxTeamSize,
+            minTeamSize: hackathon.minTeamSize,
+            rules: hackathon.rules,
+            judgingCriteria: hackathon.judgingCriteria
+          }));
+          setHackathons(transformedHackathons);
+        }
+      } catch (error) {
+        console.error('Error fetching hackathons:', error);
+      }
+    };
+
+    fetchHackathons();
+  }, []);
+
+
+  console.log(hackathons)
 
   const [userStats, setUserStats] = useState({
     level: 3,
@@ -661,9 +674,11 @@ const ParticipantDashboard = () => {
                 <div className="flex items-center justify-between">
                   <h3 className="text-xl font-semibold">{hackathon.title}</h3>
                   <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                    hackathon.status === 'Open' ? 'bg-green-900 text-green-300' : 'bg-yellow-900 text-yellow-300'
+                    hackathon.status === 'upcoming' ? 'bg-yellow-900 text-yellow-300' :
+                    hackathon.status === 'active' ? 'bg-green-900 text-green-300' :
+                    'bg-red-900 text-red-300'
                   }`}>
-                    {hackathon.status}
+                    {hackathon.status.charAt(0).toUpperCase() + hackathon.status.slice(1)}
                   </span>
                 </div>
                 
@@ -672,7 +687,7 @@ const ParticipantDashboard = () => {
                     <svg className="flex-shrink-0 mr-1.5 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
-                    {new Date(hackathon.date).toLocaleDateString()}
+                    {new Date(hackathon.startDate).toLocaleDateString()}
                   </div>
                   <div className="flex items-center text-sm text-zinc-400">
                     <svg className="flex-shrink-0 mr-1.5 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -687,23 +702,36 @@ const ParticipantDashboard = () => {
                 
                 <div className="mt-4 grid grid-cols-3 gap-2 text-center">
                   <div className="bg-zinc-800 rounded-md p-2">
-                    <div className="text-lg font-bold">{hackathon.points}</div>
-                    <div className="text-xs text-zinc-400">Points</div>
+                    <div className="text-lg font-bold">₹{hackathon.registrationFee}</div>
+                    <div className="text-xs text-zinc-400">Entry Fee</div>
                   </div>
                   <div className="bg-zinc-800 rounded-md p-2">
-                    <div className="text-lg font-bold">{hackathon.participants}</div>
-                    <div className="text-xs text-zinc-400">Participants</div>
+                    <div className="text-lg font-bold">₹{hackathon.points}</div>
+                    <div className="text-xs text-zinc-400">Prize Pool</div>
                   </div>
                   <div className="bg-zinc-800 rounded-md p-2">
-                    <div className="text-lg font-bold">{hackathon.difficulty}</div>
-                    <div className="text-xs text-zinc-400">Level</div>
+                    <div className="text-lg font-bold">{hackathon.duration}</div>
+                    <div className="text-xs text-zinc-400">Duration</div>
+                  </div>
+                </div>
+                
+                <div className="mt-4">
+                  <div className="text-sm text-zinc-400 mb-2">Domains:</div>
+                  <div className="flex flex-wrap gap-2">
+                    {hackathon.domains.map((domain, index) => (
+                      <span key={index} className="px-2 py-1 bg-zinc-800 rounded-full text-xs">
+                        {domain}
+                      </span>
+                    ))}
                   </div>
                 </div>
                 
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => router.push(`/participant/hackathon/${hackathon.id}`)}
+                  onClick={() => router.push(`/participant/hackathon/${hackathon.id}`, {
+                    state: { hackathonId: hackathon.id }
+                  })}
                   className="mt-6 w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-black bg-white hover:bg-zinc-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-black focus:ring-white"
                 >
                   View Details

@@ -1,11 +1,13 @@
 'use client';
 
+import axios from 'axios';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 const ParticipantRegistration = () => {
   const router = useRouter();
+  const dropdownRef = useRef(null);
   const [formData, setFormData] = useState({
     fullName: '',
     username: '',
@@ -15,27 +17,53 @@ const ParticipantRegistration = () => {
     confirmPassword: '',
     organization: '',
     role: '',
-    fieldOfInterest: '',
+    fieldOfInterest: [],
     linkedinProfile: '',
     githubProfile: '',
     profilePicture: null,
     bio: '',
     skills: '',
     resume: null,
-    hackathonExperience: '',
+    Experience: '',
     city: '',
     country: '',
+    age: '',
   });
 
   const [errors, setErrors] = useState({});
   const [currentStep, setCurrentStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const totalSteps = 4;
+
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const fieldOfInterestOptions = [
+    'Web Development',
+    'Mobile Development',
+    'Data Science',
+    'Machine Learning',
+    'AI',
+    'Cyber Security',
+    'Cloud Computing',
+    'DevOps',
+    'Blockchain',
+    'Game Development'
+  ];
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value
+    }));
+  };
+
+  const handleFieldOfInterestChange = (field) => {
+    setFormData(prev => ({
+      ...prev,
+      fieldOfInterest: prev.fieldOfInterest.includes(field)
+        ? prev.fieldOfInterest.filter(f => f !== field)
+        : [...prev.fieldOfInterest, field]
     }));
   };
 
@@ -47,86 +75,85 @@ const ParticipantRegistration = () => {
     }));
   };
 
-  const validateForm = () => {
-    const newErrors = {};
-    if (!formData.fullName) newErrors.fullName = 'Full name is required';
-    if (!formData.email) newErrors.email = 'Email is required';
-    if (!formData.password) newErrors.password = 'Password is required';
+  // Validation functions for each step
+  const validateStep1 = () => {
+    const stepErrors = {};
+    if (!formData.fullName.trim()) stepErrors.fullName = 'Full name is required';
+    if (!formData.email.trim()) stepErrors.email = 'Email is required';
+    if (!formData.password) stepErrors.password = 'Password is required';
     if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
+      stepErrors.confirmPassword = 'Passwords do not match';
     }
-    if (!formData.organization) newErrors.organization = 'Organization is required';
-    if (!formData.role) newErrors.role = 'Role is required';
-    if (!formData.fieldOfInterest) newErrors.fieldOfInterest = 'Field of interest is required';
-    if (!formData.city) newErrors.city = 'City is required';
-    if (!formData.country) newErrors.country = 'Country is required';
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    if (!formData.username.trim()) stepErrors.username = 'Username is required';
+    if (!formData.phoneNumber.trim()) stepErrors.phoneNumber = 'Phone number is required';
+    return stepErrors;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validateForm()) return;
+  const validateStep2 = () => {
+    const stepErrors = {};
+    if (!formData.organization.trim()) stepErrors.organization = 'Organization is required';
+    if (!formData.role.trim()) stepErrors.role = 'Role is required';
+    if (!formData.fieldOfInterest || formData.fieldOfInterest.length === 0) {
+      stepErrors.fieldOfInterest = 'At least one field of interest is required';
+    }
+    if (!formData.linkedinProfile.trim()) stepErrors.linkedinProfile = 'LinkedIn profile is required';
+    if (!formData.githubProfile.trim()) stepErrors.githubProfile = 'GitHub/Portfolio link is required';
+    return stepErrors;
+  };
 
-    try {
-      // Create FormData for file uploads
-      const formDataToSend = new FormData();
-      
-      // Append all text fields
-      Object.keys(formData).forEach(key => {
-        if (key !== 'profilePicture' && key !== 'resume' && key !== 'confirmPassword') {
-          formDataToSend.append(key, formData[key]);
-        }
-      });
+  const validateStep3 = () => {
+    const stepErrors = {};
+    if (!formData.bio.trim()) stepErrors.bio = 'Bio is required';
+    if (!formData.skills.trim()) stepErrors.skills = 'Skills are required';
+    if (!formData.age) stepErrors.age = 'Age is required';
+    return stepErrors;
+  };
 
-      // Append files if they exist
-      if (formData.profilePicture) {
-        formDataToSend.append('profilePicture', formData.profilePicture);
-      }
-      if (formData.resume) {
-        formDataToSend.append('resume', formData.resume);
-      }
+  const validateStep4 = () => {
+    const stepErrors = {};
+    if (!formData.city.trim()) stepErrors.city = 'City is required';
+    if (!formData.country.trim()) stepErrors.country = 'Country is required';
+    if (!formData.Experience.trim()) stepErrors.Experience = 'Hackathon experience is required';
+    return stepErrors;
+  };
 
-      // Make API call to register participant
-      const response = await fetch('/api/participant/register', {
-        method: 'POST',
-        body: formDataToSend,
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to register');
-      }
-
-      // Get the response data
-      const data = await response.json();
-
-      // Store the token in localStorage or cookies if provided
-      if (data.token) {
-        localStorage.setItem('token', data.token);
-      }
-
-      // Redirect to dashboard on success
-      router.push('/participant/dashboard');
-    } catch (error) {
-      console.error('Registration error:', error);
-      setErrors(prev => ({
-        ...prev,
-        submit: error.message || 'Failed to register. Please try again.'
-      }));
+  const validateCurrentStep = () => {
+    switch (currentStep) {
+      case 1:
+        return validateStep1();
+      case 2:
+        return validateStep2();
+      case 3:
+        return validateStep3();
+      case 4:
+        return validateStep4();
+      default:
+        return {};
     }
   };
 
   const nextStep = () => {
-    if (currentStep < totalSteps) {
-      setCurrentStep(currentStep + 1);
+    const stepErrors = validateCurrentStep();
+    setErrors(stepErrors);
+
+    if (Object.keys(stepErrors).length === 0) {
+      if (currentStep < totalSteps) {
+        setCurrentStep(currentStep + 1);
+        window.scrollTo(0, 0);
+      }
+    } else {
+      // Scroll to the first error
+      const firstErrorField = document.querySelector('.text-red-500');
+      if (firstErrorField) {
+        firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
     }
   };
 
   const prevStep = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
+      window.scrollTo(0, 0);
     }
   };
 
@@ -151,6 +178,79 @@ const ParticipantRegistration = () => {
       }
     }
   };
+
+  // Add useEffect for handling clicks outside dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  // Update handleSubmit to include final validation
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const stepErrors = validateCurrentStep();
+    setErrors(stepErrors);
+
+    if (Object.keys(stepErrors).length > 0) {
+      const firstErrorField = document.querySelector('.text-red-500');
+      if (firstErrorField) {
+        firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      // Make API call to register participant
+      const response = await axios.post('http://localhost:7000/api/participant/register', {
+        name: formData.fullName,
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+        phone: formData.phone,
+        profilePicture: formData.profilePicture || "", // Optional, can be left empty if not provided
+        age: formData.age,
+        experience: formData.Experience,
+        skills: formData.skills,
+        githubLink: formData.githubProfile,
+        linkedIn: formData.linkedinProfile,
+        organization: formData.organization,
+        feildOfInterest: formData.fieldOfInterest, // Ensure correct spelling in your formData
+        bio: formData.bio,
+        city: formData.city,
+        country: formData.country,
+        resume: formData.resume || ""
+      });
+
+      if(response.status !== 201){
+        alert(response.data.error || "Error while creating account")
+      }
+
+      alert('Registration Successful')
+
+      // Redirect to dashboard on success
+      router.push('/participant/dashboard');
+    } catch (error) {
+      console.error('Registration error:', error);
+      setErrors(prev => ({
+        ...prev,
+        submit: error.message || 'Failed to register. Please try again.'
+      }));
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Add this near the start of your JSX, after the form title:
+  const requiredFieldIndicator = <span className="text-red-500 ml-1">*</span>;
 
   return (
     <div className="min-h-screen bg-black text-white py-12 px-4 sm:px-6 lg:px-8">
@@ -204,7 +304,9 @@ const ParticipantRegistration = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Full Name */}
                   <div>
-                    <label className="block text-sm font-medium text-zinc-300">Full Name *</label>
+                    <label className="block text-sm font-medium text-zinc-300">
+                      Full Name {requiredFieldIndicator}
+                    </label>
                     <input
                       type="text"
                       name="fullName"
@@ -217,7 +319,9 @@ const ParticipantRegistration = () => {
 
                   {/* Username */}
                   <div>
-                    <label className="block text-sm font-medium text-zinc-300">Username</label>
+                    <label className="block text-sm font-medium text-zinc-300">
+                      Username {requiredFieldIndicator}
+                    </label>
                     <input
                       type="text"
                       name="username"
@@ -229,7 +333,9 @@ const ParticipantRegistration = () => {
 
                   {/* Email */}
                   <div>
-                    <label className="block text-sm font-medium text-zinc-300">Email Address *</label>
+                    <label className="block text-sm font-medium text-zinc-300">
+                      Email Address {requiredFieldIndicator}
+                    </label>
                     <input
                       type="email"
                       name="email"
@@ -242,7 +348,9 @@ const ParticipantRegistration = () => {
 
                   {/* Phone Number */}
                   <div>
-                    <label className="block text-sm font-medium text-zinc-300">Phone Number</label>
+                    <label className="block text-sm font-medium text-zinc-300">
+                      Phone Number {requiredFieldIndicator}
+                    </label>
                     <input
                       type="tel"
                       name="phoneNumber"
@@ -254,7 +362,9 @@ const ParticipantRegistration = () => {
 
                   {/* Password */}
                   <div>
-                    <label className="block text-sm font-medium text-zinc-300">Password *</label>
+                    <label className="block text-sm font-medium text-zinc-300">
+                      Password {requiredFieldIndicator}
+                    </label>
                     <input
                       type="password"
                       name="password"
@@ -267,7 +377,9 @@ const ParticipantRegistration = () => {
 
                   {/* Confirm Password */}
                   <div>
-                    <label className="block text-sm font-medium text-zinc-300">Confirm Password *</label>
+                    <label className="block text-sm font-medium text-zinc-300">
+                      Confirm Password {requiredFieldIndicator}
+                    </label>
                     <input
                       type="password"
                       name="confirmPassword"
@@ -289,7 +401,9 @@ const ParticipantRegistration = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Organization */}
                   <div>
-                    <label className="block text-sm font-medium text-zinc-300">Organization / Institution Name *</label>
+                    <label className="block text-sm font-medium text-zinc-300">
+                      Organization / Institution Name {requiredFieldIndicator}
+                    </label>
                     <input
                       type="text"
                       name="organization"
@@ -302,7 +416,9 @@ const ParticipantRegistration = () => {
 
                   {/* Role */}
                   <div>
-                    <label className="block text-sm font-medium text-zinc-300">Current Role / Designation *</label>
+                    <label className="block text-sm font-medium text-zinc-300">
+                      Current Role / Designation {requiredFieldIndicator}
+                    </label>
                     <input
                       type="text"
                       name="role"
@@ -314,21 +430,81 @@ const ParticipantRegistration = () => {
                   </div>
 
                   {/* Field of Interest */}
-                  <div>
-                    <label className="block text-sm font-medium text-zinc-300">Field of Interest *</label>
-                    <input
-                      type="text"
-                      name="fieldOfInterest"
-                      value={formData.fieldOfInterest}
-                      onChange={handleInputChange}
-                      className="mt-1 block w-full rounded-md bg-zinc-800 border-zinc-700 text-white shadow-sm focus:border-white focus:ring-white"
-                    />
-                    {errors.fieldOfInterest && <p className="text-red-500 text-sm mt-1">{errors.fieldOfInterest}</p>}
+                  <div className="relative">
+                    <label className="block text-sm font-medium text-zinc-300">
+                      Fields of Interest {requiredFieldIndicator}
+                    </label>
+                    <div ref={dropdownRef} className="mt-1 relative">
+                      <div
+                        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                        className="cursor-pointer w-full rounded-md bg-zinc-800 border border-zinc-700 px-3 py-2 text-white shadow-sm focus:border-white focus:ring-white"
+                      >
+                        {formData.fieldOfInterest.length === 0 ? (
+                          <span className="text-zinc-400">Select fields of interest</span>
+                        ) : (
+                          <span>{formData.fieldOfInterest.join(', ')}</span>
+                        )}
+                      </div>
+                      
+                      {isDropdownOpen && (
+                        <div className="absolute z-10 mt-1 w-full rounded-md bg-zinc-800 border border-zinc-700 shadow-lg">
+                          <div className="max-h-60 overflow-auto py-1">
+                            {fieldOfInterestOptions.map((field) => (
+                              <div
+                                key={field}
+                                className="flex items-center px-3 py-2 hover:bg-zinc-700 cursor-pointer"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleFieldOfInterestChange(field);
+                                }}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={formData.fieldOfInterest.includes(field)}
+                                  onChange={() => {}}
+                                  className="h-4 w-4 rounded border-zinc-600 text-white focus:ring-white"
+                                />
+                                <label className="ml-2 text-sm text-white cursor-pointer">
+                                  {field}
+                                </label>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    {formData.fieldOfInterest.length > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {formData.fieldOfInterest.map((field) => (
+                          <span
+                            key={field}
+                            className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-zinc-700 text-white"
+                          >
+                            {field}
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleFieldOfInterestChange(field);
+                              }}
+                              className="ml-1 inline-flex items-center justify-center h-4 w-4 rounded-full hover:bg-zinc-600"
+                            >
+                              ×
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    {errors.fieldOfInterest && (
+                      <p className="text-red-500 text-sm mt-1">{errors.fieldOfInterest}</p>
+                    )}
                   </div>
 
                   {/* LinkedIn Profile */}
                   <div>
-                    <label className="block text-sm font-medium text-zinc-300">LinkedIn Profile</label>
+                    <label className="block text-sm font-medium text-zinc-300">
+                      LinkedIn Profile {requiredFieldIndicator}
+                    </label>
                     <input
                       type="url"
                       name="linkedinProfile"
@@ -340,7 +516,9 @@ const ParticipantRegistration = () => {
 
                   {/* GitHub Profile */}
                   <div>
-                    <label className="block text-sm font-medium text-zinc-300">GitHub/Portfolio Link</label>
+                    <label className="block text-sm font-medium text-zinc-300">
+                      GitHub/Portfolio Link {requiredFieldIndicator}
+                    </label>
                     <input
                       type="url"
                       name="githubProfile"
@@ -361,7 +539,9 @@ const ParticipantRegistration = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Profile Picture */}
                   <div>
-                    <label className="block text-sm font-medium text-zinc-300">Profile Picture</label>
+                    <label className="block text-sm font-medium text-zinc-300">
+                      Profile Picture {requiredFieldIndicator}
+                    </label>
                     <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-zinc-700 border-dashed rounded-md hover:border-white transition-colors">
                       <div className="space-y-1 text-center">
                         <svg className="mx-auto h-12 w-12 text-zinc-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
@@ -381,7 +561,9 @@ const ParticipantRegistration = () => {
 
                   {/* Resume */}
                   <div>
-                    <label className="block text-sm font-medium text-zinc-300">Resume</label>
+                    <label className="block text-sm font-medium text-zinc-300">
+                      Resume
+                    </label>
                     <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-zinc-700 border-dashed rounded-md hover:border-white transition-colors">
                       <div className="space-y-1 text-center">
                         <svg className="mx-auto h-12 w-12 text-zinc-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
@@ -400,8 +582,25 @@ const ParticipantRegistration = () => {
                   </div>
 
                   {/* Bio */}
+
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-zinc-300">Bio/About Me</label>
+                    <label className="block text-sm font-medium text-zinc-300">
+                      Age {requiredFieldIndicator}
+                    </label>
+                    <textarea
+                      name="age"
+                      value={formData.age}
+                      onChange={handleInputChange}
+                      rows={1}
+                      className="mt-1 block w-20 rounded-md bg-zinc-800 border-zinc-700 text-white shadow-sm focus:border-white focus:ring-white"
+                    />
+                  </div>
+
+
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-zinc-300">
+                      Bio/About Me {requiredFieldIndicator}
+                    </label>
                     <textarea
                       name="bio"
                       value={formData.bio}
@@ -413,7 +612,9 @@ const ParticipantRegistration = () => {
 
                   {/* Skills */}
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-zinc-300">Skills / Expertise</label>
+                    <label className="block text-sm font-medium text-zinc-300">
+                      Skills / Expertise {requiredFieldIndicator}
+                    </label>
                     <textarea
                       name="skills"
                       value={formData.skills}
@@ -434,7 +635,9 @@ const ParticipantRegistration = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* City */}
                   <div>
-                    <label className="block text-sm font-medium text-zinc-300">City *</label>
+                    <label className="block text-sm font-medium text-zinc-300">
+                      City {requiredFieldIndicator}
+                    </label>
                     <input
                       type="text"
                       name="city"
@@ -447,7 +650,9 @@ const ParticipantRegistration = () => {
 
                   {/* Country */}
                   <div>
-                    <label className="block text-sm font-medium text-zinc-300">Country *</label>
+                    <label className="block text-sm font-medium text-zinc-300">
+                      Country {requiredFieldIndicator}
+                    </label>
                     <input
                       type="text"
                       name="country"
@@ -460,10 +665,12 @@ const ParticipantRegistration = () => {
 
                   {/* Hackathon Experience */}
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-zinc-300">Hackathon Experience</label>
+                    <label className="block text-sm font-medium text-zinc-300">
+                      Hackathon Experience {requiredFieldIndicator}
+                    </label>
                     <textarea
-                      name="hackathonExperience"
-                      value={formData.hackathonExperience}
+                      name="Experience"
+                      value={formData.Experience}
                       onChange={handleInputChange}
                       rows={3}
                       className="mt-1 block w-full rounded-md bg-zinc-800 border-zinc-700 text-white shadow-sm focus:border-white focus:ring-white"
@@ -501,11 +708,14 @@ const ParticipantRegistration = () => {
               ) : (
                 <motion.button
                   type="submit"
+                  disabled={isSubmitting}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-black bg-white hover:bg-zinc-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-zinc-900 focus:ring-white"
+                  className={`px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-black bg-white 
+                    ${isSubmitting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-zinc-200'} 
+                    focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-zinc-900 focus:ring-white`}
                 >
-                  Register
+                  {isSubmitting ? 'Registering...' : 'Register'}
                 </motion.button>
               )}
             </div>
