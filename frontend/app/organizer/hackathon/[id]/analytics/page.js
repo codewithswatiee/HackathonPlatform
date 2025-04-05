@@ -1,5 +1,6 @@
 "use client"
 
+import { getProblemStatements, getUserDocuments, saveDocumentMetadata, saveProblemStatement, uploadFile } from '@/firebase/utils'
 import { ArrowLeftIcon, CalendarIcon, TagIcon, UserGroupIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import { ArcElement, Chart as ChartJS, Legend, Tooltip } from 'chart.js'
 import { motion, useScroll, useSpring } from 'framer-motion'
@@ -42,6 +43,15 @@ export default function HackathonAnalytics({ params }) {
   const scrollRef = useRef(null)
   const { scrollXProgress } = useScroll({ container: scrollRef })
   const pathLength = useSpring(scrollXProgress, { stiffness: 400, damping: 90 })
+  const [problemStatements, setProblemStatements] = useState({})
+  const [documents, setDocuments] = useState([])
+  const [showProblemStatementModal, setShowProblemStatementModal] = useState(false)
+  const [showAIIdeationModal, setShowAIIdeationModal] = useState(false)
+  const [selectedProblemStatement, setSelectedProblemStatement] = useState(null)
+  const [uploadProgress, setUploadProgress] = useState({})
+  const [isUploading, setIsUploading] = useState(false)
+  const [uploadError, setUploadError] = useState(null)
+  const [currentCheckpoint, setCurrentCheckpoint] = useState(null)
 
   const domainChartData = {
     labels: Object.keys(hackathon?.registeredTeams?.byDomain || {}),
@@ -185,6 +195,67 @@ export default function HackathonAnalytics({ params }) {
     return () => clearInterval(timer)
   }, [params.id])
 
+  // Fetch user's documents on component mount
+  useEffect(() => {
+    const fetchDocuments = async () => {
+      try {
+        // In a real app, you would get these IDs from your auth system
+        const docs = await getUserDocuments(params.id, 'current-user-id');
+        setDocuments(docs);
+      } catch (error) {
+        console.error('Error fetching documents:', error);
+      }
+    };
+
+    const fetchProblemStatements = async () => {
+      try {
+        const statements = await getProblemStatements(params.id);
+        const groupedStatements = statements.reduce((acc, statement) => {
+          if (!acc[statement.domain]) {
+            acc[statement.domain] = [];
+          }
+          acc[statement.domain].push(statement);
+          return acc;
+        }, {});
+        setProblemStatements(groupedStatements);
+      } catch (error) {
+        console.error('Error fetching problem statements:', error);
+      }
+    };
+
+    fetchDocuments();
+    fetchProblemStatements();
+  }, [params.id]);
+
+  useEffect(() => {
+    const updateCheckpointStatus = () => {
+      const now = new Date();
+      const updatedEvents = timelineEvents.map(event => {
+        const eventStart = new Date(`${event.date} ${event.startTime}`);
+        const eventEnd = new Date(`${event.date} ${event.endTime}`);
+        
+        if (now >= eventStart && now <= eventEnd) {
+          setCurrentCheckpoint(event);
+          return { ...event, status: 'current' };
+        } else if (now < eventStart) {
+          return { ...event, status: 'upcoming' };
+        } else {
+          return { ...event, status: 'completed' };
+        }
+      });
+      
+      setTimelineEvents(updatedEvents);
+    };
+
+    // Update status every minute
+    const interval = setInterval(updateCheckpointStatus, 60000);
+    
+    // Initial update
+    updateCheckpointStatus();
+    
+    return () => clearInterval(interval);
+  }, [timelineEvents]);
+
   const handleTabChange = (tab) => {
     if (tab === 'timeline' && !timelineConfigured) {
       setShowTimelineConfig(true)
@@ -250,47 +321,53 @@ export default function HackathonAnalytics({ params }) {
     const endDate = new Date(hackathon.endDate)
     const totalHours = Math.floor((endDate - startDate) / (1000 * 60 * 60))
     
-    // Generate AI timeline based on hackathon duration
-    const aiEvents = [
+    // Mandatory checkpoints that will always be included
+    const mandatoryCheckpoints = [
       {
-        phase: "Orientation & Kickoff",
+        phase: "NOC & Document Submission",
         startTime: "09:00",
-        endTime: "10:00",
-        description: "Welcome session, rules explanation, and team introductions",
-        duration: 1
+        endTime: "11:00",
+        description: "Submit No Objection Certificate and required documents. Mandatory checkpoint for all participants.",
+        duration: 2,
+        isCheckpoint: true,
+        checkpointType: "documents",
+        status: 'current'
       },
       {
-        phase: "Team Formation & Networking",
-        startTime: "10:00",
-        endTime: "11:30",
-        description: "Form teams and connect with potential collaborators",
-        duration: 1.5
-      },
-      {
-        phase: "Idea Submission & Review",
+        phase: "Problem Statement Selection",
         startTime: "11:30",
-        endTime: "13:00",
-        description: "Submit project proposals and receive initial feedback",
-        duration: 1.5
+        endTime: "13:30",
+        description: "Select problem statement from available options based on your domain. Organizers can add new problem statements.",
+        duration: 2,
+        isCheckpoint: true,
+        checkpointType: "problem_statement",
+        status: 'upcoming'
       },
       {
-        phase: "Hacking Begins",
+        phase: "Ideation Phase",
         startTime: "14:00",
-        endTime: "20:00",
-        description: "Start working on your projects with your team",
-        duration: 6
+        endTime: "17:00",
+        description: "Brainstorm and develop initial ideas for your selected problem statement. Use AI assistance for ideation.",
+        duration: 3,
+        isCheckpoint: true,
+        checkpointType: "ideation",
+        status: 'upcoming'
       }
     ]
 
+    // Additional events based on hackathon duration
+    const additionalEvents = []
+    
     if (totalHours > 24) {
-      aiEvents.push(
+      additionalEvents.push(
         {
           phase: "Mentoring Sessions",
           startTime: "10:00",
           endTime: "12:00",
           description: "One-on-one sessions with industry mentors",
           duration: 2,
-          dayOffset: 1
+          dayOffset: 1,
+          status: 'upcoming'
         },
         {
           phase: "Progress Check-in",
@@ -298,20 +375,22 @@ export default function HackathonAnalytics({ params }) {
           endTime: "16:00",
           description: "Teams present their progress and receive feedback",
           duration: 1,
-          dayOffset: 1
+          dayOffset: 1,
+          status: 'upcoming'
         }
       )
     }
 
     if (totalHours > 36) {
-      aiEvents.push(
+      additionalEvents.push(
         {
           phase: "Final Submissions",
           startTime: "14:00",
           endTime: "16:00",
           description: "Submit your final project with documentation",
           duration: 2,
-          dayOffset: 2
+          dayOffset: 2,
+          status: 'upcoming'
         },
         {
           phase: "Project Presentations",
@@ -319,39 +398,28 @@ export default function HackathonAnalytics({ params }) {
           endTime: "18:00",
           description: "Present your project to the judges",
           duration: 2,
-          dayOffset: 2
+          dayOffset: 2,
+          status: 'upcoming'
         }
       )
     }
 
     // Convert events to timeline format
-    const newEvents = aiEvents.map((event, index) => {
+    const allEvents = [...mandatoryCheckpoints, ...additionalEvents].map((event, index) => {
       const eventDate = new Date(startDate)
       if (event.dayOffset) {
         eventDate.setDate(eventDate.getDate() + event.dayOffset)
       }
       
-      const [startHours, startMinutes] = event.startTime.split(':')
-      const [endHours, endMinutes] = event.endTime.split(':')
-      
-      const eventStartDate = new Date(eventDate)
-      eventStartDate.setHours(parseInt(startHours), parseInt(startMinutes), 0)
-      
-      const eventEndDate = new Date(eventDate)
-      eventEndDate.setHours(parseInt(endHours), parseInt(endMinutes), 0)
-
       return {
-        phase: event.phase,
-        date: eventStartDate.toISOString().split('T')[0],
-        startTime: eventStartDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        endTime: eventEndDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        description: event.description,
-        duration: event.duration,
-        status: index === 0 ? 'current' : 'upcoming'
+        ...event,
+        date: eventDate.toISOString().split('T')[0],
+        startTime: event.startTime,
+        endTime: event.endTime
       }
     })
 
-    setTimelineEvents(newEvents)
+    setTimelineEvents(allEvents)
     setTimelineConfigured(true)
     setShowTimelineConfig(false)
     setIsGeneratingAI(false)
@@ -399,6 +467,114 @@ export default function HackathonAnalytics({ params }) {
     setTimelineEvents(updatedEvents)
     setShowEditModal(false)
     setEditingEvent(null)
+  }
+
+  const handleDocumentSubmission = async (files) => {
+    setIsUploading(true);
+    setUploadError(null);
+    
+    try {
+      for (const file of files) {
+        console.log('Processing file:', file.name);
+        
+        // Validate file size (10MB limit)
+        if (file.size > 10 * 1024 * 1024) {
+          throw new Error(`File ${file.name} is too large. Maximum size is 10MB.`);
+        }
+
+        // Validate file type
+        const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+        if (!allowedTypes.includes(file.type)) {
+          throw new Error(`File ${file.name} has an invalid type. Only PDF, DOC, and DOCX files are allowed.`);
+        }
+
+        setUploadProgress(prev => ({
+          ...prev,
+          [file.name]: 0
+        }));
+
+        try {
+          // Upload file to Firebase Storage with progress tracking
+          const downloadURL = await uploadFile(
+            file, 
+            params.id, 
+            'current-user-id',
+            (progress) => {
+              console.log(`Progress for ${file.name}:`, progress);
+              setUploadProgress(prev => ({
+                ...prev,
+                [file.name]: progress
+              }));
+            }
+          );
+
+          // Save metadata to Firestore
+          await saveDocumentMetadata(params.id, 'current-user-id', {
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            url: downloadURL,
+            uploadedAt: new Date().toISOString()
+          });
+
+          console.log(`Successfully uploaded ${file.name}`);
+        } catch (error) {
+          console.error(`Error uploading ${file.name}:`, error);
+          setUploadError(`Failed to upload ${file.name}: ${error.message}`);
+          return; // Stop processing if one file fails
+        }
+      }
+
+      // Refresh documents list
+      const updatedDocs = await getUserDocuments(params.id, 'current-user-id');
+      setDocuments(updatedDocs);
+    } catch (error) {
+      console.error('Error in document submission:', error);
+      setUploadError(error.message || 'Failed to upload documents. Please try again.');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleProblemStatementUpload = async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const domain = form.domain.value;
+    const title = form.title.value;
+    const description = form.description.value;
+
+    try {
+      const problemStatementId = await saveProblemStatement(params.id, {
+        domain,
+        title,
+        description
+      });
+
+      // Refresh problem statements
+      const statements = await getProblemStatements(params.id);
+      const groupedStatements = statements.reduce((acc, statement) => {
+        if (!acc[statement.domain]) {
+          acc[statement.domain] = [];
+        }
+        acc[statement.domain].push(statement);
+        return acc;
+      }, {});
+      setProblemStatements(groupedStatements);
+
+      // Reset form
+      form.reset();
+    } catch (error) {
+      console.error('Error saving problem statement:', error);
+    }
+  };
+
+  const handleProblemStatementSelection = (statement) => {
+    setSelectedProblemStatement(statement)
+  }
+
+  const handleAIIdeation = async (problemStatement) => {
+    setShowAIIdeationModal(true)
+    // AI ideation logic will be implemented here
   }
 
   if (loading) {
@@ -1262,6 +1438,232 @@ export default function HackathonAnalytics({ params }) {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Document Submission Modal */}
+      {currentCheckpoint?.checkpointType === 'documents' && currentCheckpoint?.status === 'current' && (
+        <div className="fixed bottom-4 right-4 w-96 bg-zinc-900 rounded-xl shadow-lg border border-zinc-800">
+          <div className="p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Document Submission</h3>
+              <button 
+                onClick={() => setCurrentCheckpoint(null)}
+                className="text-zinc-400 hover:text-white"
+              >
+                <XMarkIcon className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div className="border-2 border-dashed border-zinc-700 rounded-lg p-4 text-center">
+                <input
+                  type="file"
+                  multiple
+                  className="hidden"
+                  id="document-upload"
+                  onChange={(e) => handleDocumentSubmission(Array.from(e.target.files))}
+                  disabled={isUploading}
+                />
+                <label
+                  htmlFor="document-upload"
+                  className={`cursor-pointer block ${isUploading ? 'opacity-50' : ''}`}
+                >
+                  <div className="text-zinc-400">
+                    <svg className="mx-auto h-12 w-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
+                    <p className="text-sm">
+                      {isUploading ? 'Uploading...' : 'Drop files here or click to upload'}
+                    </p>
+                    <p className="text-xs mt-1">Supported formats: PDF, DOC, DOCX</p>
+                  </div>
+                </label>
+              </div>
+
+              {/* Upload Progress */}
+              {Object.keys(uploadProgress).length > 0 && (
+                <div className="space-y-2">
+                  {Object.entries(uploadProgress).map(([fileName, progress]) => (
+                    <div key={fileName} className="text-sm">
+                      <div className="flex justify-between mb-1">
+                        <span className="text-zinc-400">{fileName}</span>
+                        <span className="text-zinc-400">{progress}%</span>
+                      </div>
+                      <div className="w-full bg-zinc-700 rounded-full h-1.5">
+                        <div
+                          className="bg-blue-500 h-1.5 rounded-full transition-all duration-300"
+                          style={{ width: `${progress}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {uploadError && (
+                <div className="text-red-500 text-sm p-2 bg-red-500/10 rounded-lg">
+                  {uploadError}
+                </div>
+              )}
+
+              {documents.length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium text-zinc-400">Uploaded Documents</h4>
+                  {documents.map((doc) => (
+                    <div key={doc.id} className="flex items-center justify-between bg-zinc-800 rounded-lg p-2">
+                      <div className="flex items-center space-x-2">
+                        <span className="text-sm truncate">{doc.name}</span>
+                        <span className={`text-xs px-2 py-0.5 rounded-full ${
+                          doc.status === 'approved' ? 'bg-green-500/20 text-green-400' :
+                          doc.status === 'rejected' ? 'bg-red-500/20 text-red-400' :
+                          'bg-yellow-500/20 text-yellow-400'
+                        }`}>
+                          {doc.status}
+                        </span>
+                      </div>
+                      <a
+                        href={doc.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-400 hover:text-blue-300"
+                      >
+                        View
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Problem Statement Modal */}
+      {showProblemStatementModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-zinc-900 rounded-xl p-6 max-w-2xl w-full mx-4">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold">Problem Statements</h2>
+              <button
+                onClick={() => setShowProblemStatementModal(false)}
+                className="text-zinc-400 hover:text-white"
+              >
+                <XMarkIcon className="w-6 h-6" />
+              </button>
+            </div>
+
+            {/* Organizer Controls */}
+            {hackathon.organizer.email === "john@techinnovators.com" && (
+              <div className="mb-6 p-4 bg-zinc-800 rounded-lg">
+                <h3 className="text-lg font-medium mb-4">Add New Problem Statement</h3>
+                <form onSubmit={handleProblemStatementUpload} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-zinc-400 mb-2">Domain</label>
+                    <select
+                      name="domain"
+                      required
+                      className="w-full bg-zinc-700 border border-zinc-600 rounded-lg px-4 py-2 text-white"
+                    >
+                      <option value="Web Dev">Web Development</option>
+                      <option value="AI/ML">AI/ML</option>
+                      <option value="Blockchain">Blockchain</option>
+                      <option value="Mobile">Mobile Development</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-zinc-400 mb-2">Title</label>
+                    <input
+                      type="text"
+                      name="title"
+                      required
+                      className="w-full bg-zinc-700 border border-zinc-600 rounded-lg px-4 py-2 text-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-zinc-400 mb-2">Description</label>
+                    <textarea
+                      name="description"
+                      required
+                      rows="4"
+                      className="w-full bg-zinc-700 border border-zinc-600 rounded-lg px-4 py-2 text-white"
+                    ></textarea>
+                  </div>
+                  <button
+                    type="submit"
+                    className="w-full py-2 bg-blue-500 hover:bg-blue-600 rounded-lg text-white"
+                  >
+                    Add Problem Statement
+                  </button>
+                </form>
+              </div>
+            )}
+
+            {/* Problem Statements List */}
+            <div className="space-y-6">
+              {Object.entries(problemStatements).map(([domain, statements]) => (
+                <div key={domain}>
+                  <h3 className="text-lg font-medium mb-4">{domain}</h3>
+                  <div className="space-y-4">
+                    {statements.map((statement) => (
+                      <div key={statement.id} className="bg-zinc-800 rounded-lg p-4">
+                        <h4 className="font-medium mb-2">{statement.title}</h4>
+                        <p className="text-sm text-zinc-400 mb-4">{statement.description}</p>
+                        <button
+                          onClick={() => handleProblemStatementSelection(statement)}
+                          className="text-sm text-blue-400 hover:text-blue-300"
+                        >
+                          Select Problem Statement
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* AI Ideation Modal */}
+      {showAIIdeationModal && selectedProblemStatement && (
+        <div className="fixed bottom-4 right-4 w-96 bg-zinc-900 rounded-xl shadow-lg border border-zinc-800">
+          <div className="p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">AI Ideation Assistant</h3>
+              <button
+                onClick={() => setShowAIIdeationModal(false)}
+                className="text-zinc-400 hover:text-white"
+              >
+                <XMarkIcon className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div className="bg-zinc-800 rounded-lg p-4">
+                <h4 className="text-sm font-medium text-zinc-400 mb-2">Selected Problem</h4>
+                <p className="text-sm">{selectedProblemStatement.title}</p>
+              </div>
+              <div className="bg-zinc-800 rounded-lg p-4 h-64 overflow-y-auto">
+                <h4 className="text-sm font-medium text-zinc-400 mb-2">AI Suggestions</h4>
+                <div className="space-y-3">
+                  <p className="text-sm text-zinc-300">
+                    Here are some potential approaches to solve this problem:
+                  </p>
+                  {/* AI suggestions will be populated here */}
+                </div>
+              </div>
+              <div className="flex space-x-2">
+                <input
+                  type="text"
+                  placeholder="Ask AI for ideas..."
+                  className="flex-1 bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2 text-white text-sm"
+                />
+                <button className="px-4 py-2 bg-blue-500 hover:bg-blue-600 rounded-lg text-white text-sm">
+                  Ask AI
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
