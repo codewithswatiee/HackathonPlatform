@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { useRouter, useSearchParams } from 'next/navigation';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
+import { use } from 'react';
 
 const CreateTeam = ({ params }) => {
   const router = useRouter();
@@ -17,7 +18,11 @@ const CreateTeam = ({ params }) => {
   ]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [showTeamCode, setShowTeamCode] = useState(false);
   const { user } = useSelector((state) => state.auth);
+  
+  // Properly unwrap params using React.use()
+  const { id: hackathonId } = use(params);
 
   useEffect(() => {
     if (isJoining) {
@@ -41,19 +46,24 @@ const CreateTeam = ({ params }) => {
       setError(null);
 
       const teamData = {
-        hackathonId: params.id,
+        hackathonId,
         participantId: user._id,
         role: isJoining ? 'member' : 'leader',
         teamCode: isJoining ? teamCode : undefined
       };
 
-      const response = await axios.post('http:localhost:7000/api/participant/register-hackathon', teamData);
+      console.log(teamData);
+
+      const response = await axios.post('http://localhost:7000/api/participant/register-hackathon', teamData);
+      console.log(response.data);
       
       if (response.data.success) {
         if (!isJoining) {
           setTeamCode(response.data.teamCode);
+          setShowTeamCode(true);
+        } else {
+          router.push(`/participant/hackathon/${hackathonId}/team-confirmation`);
         }
-        router.push(`/participant/hackathon/${params.id}/team-confirmation`);
       } else {
         setError(response.data.message || 'Failed to register team');
       }
@@ -254,6 +264,34 @@ const CreateTeam = ({ params }) => {
                 </>
               )}
             </div>
+
+            {/* Add Team Code Display Section */}
+            {showTeamCode && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-6 p-4 bg-zinc-800 rounded-lg border border-zinc-700"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-zinc-400 mb-1">Team Joining Code</p>
+                    <p className="text-2xl font-mono font-bold tracking-wider">{teamCode}</p>
+                  </div>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="px-4 py-2 bg-blue-500 rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors"
+                    onClick={() => {
+                      navigator.clipboard.writeText(teamCode);
+                      // You can add a toast notification here if you want
+                    }}
+                  >
+                    Copy Code
+                  </motion.button>
+                </div>
+                <p className="mt-2 text-sm text-zinc-500">Share this code with your team members to let them join your team</p>
+              </motion.div>
+            )}
 
             {error && (
               <motion.div
