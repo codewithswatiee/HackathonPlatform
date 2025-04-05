@@ -192,16 +192,17 @@ const getOrganizerHackathons = async (req, res) => {
 // Get a specific hackathon
 const getHackathonById = async (req, res) => {  
     try {
-        const {hackathonId} = req.body;
+        const hackathonId = req.params; // Assuming hackathon ID is passed as a URL parameter
+        console.log(hackathonId.id);
 
-        if (!hackathonId) {
+        if (!hackathonId.id) {
             return res.status(400).json({
                 success: false,
                 message: 'Hackathon ID is required',
             })
         }
 
-        const hackathon = await Hackathon.findById(hackathonId);
+        const hackathon = await Hackathon.findById({_id: hackathonId.id});
         if (!hackathon) {
             return res.status(404).json({
                 success: false,
@@ -395,81 +396,43 @@ const updateHackathonStatus = async (req, res) => {
     }
 };
 
-
-const getHackathonTimeline = async (req, res) => {
-    const {hackathonId} = req.body;
+// Get all hackathons
+const getAllHackathons = async (req, res) => {
     try {
-        if(!hackathonId) {
-            return res.status(400).json({
-                success: false,
-                message: 'Hackathon ID is required',
-            })
-        }
+        const hackathons = await Hackathon.find();
 
-        const hackathon = await Hackathon.findById(hackathonId);
-        if(!hackathon) {
+        if (!hackathons || hackathons.length === 0) {
             return res.status(404).json({
                 success: false,
-                message: 'Hackathon not found',
-            })
+                message: 'No hackathons found',
+                error: 'NO_HACKATHONS'
+            });
         }
 
-
-        
+        res.status(200).json({
+            success: true,
+            count: hackathons.length,
+            hackathons
+        });
     } catch (error) {
-        
+        console.error('Error in getAllHackathons:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching hackathons',
+            error: error.message
+        });
     }
-}
+};
 
-const createHackathonTimeline = async (req, res) => {
-    const {organizerId, hackathonId} = req.body;
-    try {
-        if(!organizerId || !hackathonId) {
-            return res.status(400).json({
-                success: false,
-                message: 'Organizer ID and hackathon ID are required',
-            })
-        }
-
-        const hackathon = await Hackathon.findById(hackathonId);
-        if(!hackathon) {
-            return res.status(404).json({
-                success: false,
-                message: 'Hackathon not found',
-            })
-        }
-
-        const organizer = await Organizer.findById(organizerId);
-        if(!organizer) {
-            return res.status(404).json({
-                success: false,
-                message: 'Organizer not found',
-            })
-        }
-
-        const {timeline} = req.body;
-
-        if(!timeline) {
-            return res.status(400).json({
-                success: false,
-                message: 'Timeline is required',
-            })
-        }
-        
-        
-    } catch (error) {
-        
-    }
-}
-
-
+// Add the new function to the module exports
 module.exports = {
     createHackathon,
     getOrganizerHackathons,
     getHackathonById,
     updateHackathon,
     deleteHackathon,
-    updateHackathonStatus
+    updateHackathonStatus,
+    getAllHackathons 
 };
 
 

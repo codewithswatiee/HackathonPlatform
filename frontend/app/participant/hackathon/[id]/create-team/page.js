@@ -3,19 +3,25 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter, useSearchParams } from 'next/navigation';
+import axios from 'axios';
+import { useSelector } from 'react-redux';
 
 const CreateTeam = ({ params }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const incomingCode = searchParams.get('code');
-  const [teamCode] = useState(() => Math.random().toString(36).substring(2, 8).toUpperCase());
+  const [teamCode, setTeamCode] = useState('');
   const [isJoining, setIsJoining] = useState(!!incomingCode);
   const [teamMembers, setTeamMembers] = useState([
     { id: 1, name: isJoining ? 'Team Leader' : 'You (Team Leader)', role: 'Full Stack Developer', status: 'active' }
   ]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const { user } = useSelector((state) => state.auth);
 
   useEffect(() => {
     if (isJoining) {
+      setTeamCode(incomingCode);
       // Simulate checking team code
       const timer = setTimeout(() => {
         setTeamMembers(prev => [...prev, {
@@ -27,7 +33,36 @@ const CreateTeam = ({ params }) => {
       }, 500);
       return () => clearTimeout(timer);
     }
-  }, [isJoining]);
+  }, [isJoining, incomingCode]);
+
+  const handleTeamRegistration = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const teamData = {
+        hackathonId: params.id,
+        participantId: user._id,
+        role: isJoining ? 'member' : 'leader',
+        teamCode: isJoining ? teamCode : undefined
+      };
+
+      const response = await axios.post('http:localhost:7000/api/participant/register-hackathon', teamData);
+      
+      if (response.data.success) {
+        if (!isJoining) {
+          setTeamCode(response.data.teamCode);
+        }
+        router.push(`/participant/hackathon/${params.id}/team-confirmation`);
+      } else {
+        setError(response.data.message || 'Failed to register team');
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || 'An error occurred while registering the team');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Sample data - replace with API call using params.id
   const hackathon = {
@@ -199,10 +234,13 @@ const CreateTeam = ({ params }) => {
                     variants={itemVariants}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    onClick={() => router.push(`/participant/hackathon/${params.id}/team-confirmation`)}
-                    className="w-full py-3 bg-white text-black rounded-lg font-medium hover:bg-zinc-200 transition-colors"
+                    onClick={handleTeamRegistration}
+                    disabled={isLoading}
+                    className={`w-full py-3 bg-white text-black rounded-lg font-medium hover:bg-zinc-200 transition-colors ${
+                      isLoading ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
                   >
-                    Confirm Team Creation
+                    {isLoading ? 'Registering Team...' : isJoining ? 'Join Team' : 'Create Team'}
                   </motion.button>
                   <motion.button
                     variants={itemVariants}
@@ -216,6 +254,16 @@ const CreateTeam = ({ params }) => {
                 </>
               )}
             </div>
+
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-4 p-3 bg-red-500/20 border border-red-500/30 rounded-lg text-red-400 text-sm"
+              >
+                {error}
+              </motion.div>
+            )}
           </motion.div>
         </div>
       </div>
