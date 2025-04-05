@@ -1,54 +1,74 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
-import confetti from 'canvas-confetti';
+import { XMarkIcon } from '@heroicons/react/24/outline';
+import { motion, useScroll, useSpring } from 'framer-motion';
+import { useEffect, useRef, useState } from 'react';
 
 const TeamConfirmation = ({ params }) => {
   const [registeredTeams, setRegisteredTeams] = useState(42); // Sample data
-  
+  const [confetti, setConfetti] = useState(null);
+  const [timelineEvents, setTimelineEvents] = useState([]);
+  const [showDocumentModal, setShowDocumentModal] = useState(false);
+  const [selectedCheckpoint, setSelectedCheckpoint] = useState(null);
+  const [documents, setDocuments] = useState([]);
+  const [uploadProgress, setUploadProgress] = useState({});
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState(null);
+  const scrollRef = useRef(null);
+  const { scrollXProgress } = useScroll({ container: scrollRef });
+  const pathLength = useSpring(scrollXProgress, { stiffness: 400, damping: 90 });
+
   useEffect(() => {
-    // Subtle confetti animation
-    const duration = 1500;
-    const animationEnd = Date.now() + duration;
-    const defaults = { startVelocity: 20, spread: 200, ticks: 20, zIndex: 0 };
+    // Dynamically import confetti only on client side
+    import('canvas-confetti').then((confettiModule) => {
+      setConfetti(() => confettiModule.default);
+    });
 
-    const randomInRange = (min, max) => Math.random() * (max - min) + min;
-
-    const interval = setInterval(() => {
-      const timeLeft = animationEnd - Date.now();
-
-      if (timeLeft <= 0) {
-        clearInterval(interval);
-        return;
+    // TODO: Replace with actual API call to fetch timeline data
+    // This should fetch the same timeline data that organizer configured
+    const fetchTimelineData = async () => {
+      try {
+        // Mock API call - replace with actual API endpoint
+        const response = await fetch(`/api/hackathon/${params.id}/timeline`);
+        const data = await response.json();
+        setTimelineEvents(data.timeline);
+      } catch (error) {
+        // Fallback to mock data if API fails
+        const mockTimelineData = [
+          {
+            phase: "Orientation & Kickoff",
+            date: "2024-05-15",
+            startTime: "09:00 AM",
+            endTime: "10:00 AM",
+            description: "Welcome session, rules explanation, and team introductions",
+            status: 'upcoming',
+            duration: 1
+          },
+          {
+            phase: "Team Formation & Networking",
+            date: "2024-05-15",
+            startTime: "10:00 AM",
+            endTime: "11:30 AM",
+            description: "Form teams and connect with potential collaborators",
+            status: 'current',
+            duration: 1.5
+          },
+          {
+            phase: "Hacking Begins",
+            date: "2024-05-15",
+            startTime: "02:00 PM",
+            endTime: "08:00 PM",
+            description: "Start working on your projects with your team",
+            status: 'upcoming',
+            duration: 6
+          }
+        ];
+        setTimelineEvents(mockTimelineData);
       }
+    };
 
-      const particleCount = 10;
-
-      confetti({
-        ...defaults,
-        particleCount,
-        origin: { x: randomInRange(0.3, 0.7), y: randomInRange(0.3, 0.5) },
-        colors: ['#3b82f6', '#ffffff'],
-        gravity: 0.8,
-        scalar: 0.9
-      });
-    }, 150);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  // Sample event schedule data
-  const schedule = [
-    { phase: 'Registration', date: '2024-05-01', time: '09:00 AM', status: 'completed' },
-    { phase: 'Team Formation', date: '2024-05-05', time: '11:59 PM', status: 'current' },
-    { phase: 'Kickoff Meeting', date: '2024-05-15', time: '10:00 AM', status: 'upcoming' },
-    { phase: 'Development Phase', date: '2024-05-15', time: '11:00 AM', status: 'upcoming' },
-    { phase: 'Mid-Review', date: '2024-05-20', time: '02:00 PM', status: 'upcoming' },
-    { phase: 'Final Submission', date: '2024-05-25', time: '11:59 PM', status: 'upcoming' },
-    { phase: 'Presentations', date: '2024-05-26', time: '10:00 AM', status: 'upcoming' },
-    { phase: 'Awards Ceremony', date: '2024-05-26', time: '04:00 PM', status: 'upcoming' }
-  ];
+    fetchTimelineData();
+  }, [params.id]);
 
   const rules = [
     'Teams must have 2-4 members',
@@ -81,6 +101,60 @@ const TeamConfirmation = ({ params }) => {
     }
   };
 
+  const handleCheckpointClick = (event) => {
+    if (event.checkpointType === 'documents') {
+      setSelectedCheckpoint(event);
+      setShowDocumentModal(true);
+    }
+  };
+
+  const handleDocumentSubmission = async (files) => {
+    setIsUploading(true);
+    setUploadError(null);
+    
+    try {
+      for (const file of files) {
+        // Validate file size (10MB limit)
+        if (file.size > 10 * 1024 * 1024) {
+          throw new Error(`File ${file.name} is too large. Maximum size is 10MB.`);
+        }
+
+        // Validate file type
+        const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+        if (!allowedTypes.includes(file.type)) {
+          throw new Error(`File ${file.name} has an invalid type. Only PDF, DOC, and DOCX files are allowed.`);
+        }
+
+        setUploadProgress(prev => ({
+          ...prev,
+          [file.name]: 0
+        }));
+
+        // TODO: Implement actual file upload logic here
+        // For now, just simulate upload progress
+        for (let i = 0; i <= 100; i += 10) {
+          await new Promise(resolve => setTimeout(resolve, 100));
+          setUploadProgress(prev => ({
+            ...prev,
+            [file.name]: i
+          }));
+        }
+
+        // Add uploaded document to the list
+        setDocuments(prev => [...prev, {
+          id: Date.now(),
+          name: file.name,
+          status: 'pending',
+          url: URL.createObjectURL(file)
+        }]);
+      }
+    } catch (error) {
+      setUploadError(error.message);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-black text-white py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -99,42 +173,154 @@ const TeamConfirmation = ({ params }) => {
             <p className="text-zinc-400">Your team is now registered for the hackathon</p>
           </motion.div>
 
-          {/* Event Schedule */}
+          {/* Timeline Section */}
           <motion.div
-            variants={itemVariants}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
             className="bg-zinc-900 rounded-xl p-8 border border-zinc-800"
           >
-            <h2 className="text-2xl font-bold mb-6">Event Schedule</h2>
+            <h2 className="text-2xl font-bold mb-8">Event Schedule</h2>
             <div className="relative">
-              <div className="absolute top-5 left-5 w-0.5 h-[calc(100%-40px)] bg-zinc-800"></div>
-              <div className="space-y-8">
-                {schedule.map((event, index) => (
-                  <motion.div
-                    key={index}
-                    variants={itemVariants}
-                    className="relative pl-10"
+              {/* Container for horizontal scroll */}
+              <div 
+                ref={scrollRef}
+                className="overflow-x-auto overflow-y-hidden pb-8"
+                style={{ 
+                  scrollbarWidth: 'none',
+                  msOverflowStyle: 'none',
+                  '&::-webkit-scrollbar': {
+                    display: 'none'
+                  }
+                }}
+              >
+                <div className="relative min-w-max pb-12 pt-8">
+                  {/* Glowing Path */}
+                  <svg
+                    className="absolute top-[60px] left-0"
+                    width={timelineEvents.length * 300}
+                    height="100"
+                    viewBox={`0 0 ${timelineEvents.length * 300} 100`}
+                    fill="none"
+                    preserveAspectRatio="none"
                   >
-                    <div className={`absolute left-[15px] w-3 h-3 rounded-full transform -translate-x-1/2
-                      ${event.status === 'completed' ? 'bg-green-500' : 
-                        event.status === 'current' ? 'bg-blue-500' : 'bg-zinc-600'}`}
+                    {/* Background path */}
+                    <path
+                      d={`M0 50 ${timelineEvents.map((_, index) => {
+                        const x = index * 300;
+                        const controlPoint1X = x + 75;
+                        const controlPoint2X = x + 225;
+                        const nextX = x + 300;
+                        return index % 2 === 0
+                          ? `C ${controlPoint1X} 20, ${controlPoint2X} 20, ${nextX} 50`
+                          : `C ${controlPoint1X} 80, ${controlPoint2X} 80, ${nextX} 50`;
+                      }).join(' ')}`}
+                      stroke="#27272a"
+                      strokeWidth="4"
+                      strokeLinecap="round"
                     />
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between">
-                      <div>
-                        <h3 className="font-semibold text-lg">{event.phase}</h3>
-                        <p className="text-zinc-400 text-sm">
-                          {new Date(event.date).toLocaleDateString()} at {event.time}
-                        </p>
-                      </div>
-                      <span className={`mt-2 sm:mt-0 px-3 py-1 text-xs font-medium rounded-full
-                        ${event.status === 'completed' ? 'bg-green-500/20 text-green-400' :
-                          event.status === 'current' ? 'bg-blue-500/20 text-blue-400' :
-                          'bg-zinc-500/20 text-zinc-400'}`}
+                    {/* Glowing animated path */}
+                    <motion.path
+                      d={`M0 50 ${timelineEvents.map((_, index) => {
+                        const x = index * 300;
+                        const controlPoint1X = x + 75;
+                        const controlPoint2X = x + 225;
+                        const nextX = x + 300;
+                        return index % 2 === 0
+                          ? `C ${controlPoint1X} 20, ${controlPoint2X} 20, ${nextX} 50`
+                          : `C ${controlPoint1X} 80, ${controlPoint2X} 80, ${nextX} 50`;
+                      }).join(' ')}`}
+                      stroke="url(#blue-glow)"
+                      strokeWidth="4"
+                      strokeLinecap="round"
+                      style={{
+                        pathLength: pathLength,
+                        strokeDasharray: 1,
+                        strokeDashoffset: 1,
+                      }}
+                    />
+                    {/* Enhanced gradient definition */}
+                    <defs>
+                      <linearGradient id="blue-glow" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stopColor="#60a5fa" />
+                        <stop offset="50%" stopColor="#3b82f6" />
+                        <stop offset="100%" stopColor="#60a5fa" />
+                      </linearGradient>
+                      <filter id="glow">
+                        <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+                        <feMerge>
+                          <feMergeNode in="coloredBlur"/>
+                          <feMergeNode in="SourceGraphic"/>
+                        </feMerge>
+                      </filter>
+                    </defs>
+                  </svg>
+
+                  {/* Timeline Events */}
+                  <div className="flex gap-16 px-8">
+                    {timelineEvents.map((event, index) => (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                        className="relative w-[250px]"
+                        style={{
+                          marginTop: index % 2 === 0 ? '0px' : '100px'
+                        }}
                       >
-                        {event.status}
-                      </span>
-                    </div>
-                  </motion.div>
-                ))}
+                        {/* Timeline Node */}
+                        <div className="absolute left-1/2 -translate-x-1/2">
+                          <motion.div 
+                            className={`w-[50px] h-[50px] rounded-full flex items-center justify-center
+                              ${event.status === 'current' 
+                                ? 'bg-blue-500 shadow-lg shadow-blue-500/50' 
+                                : 'bg-zinc-800 border-2 border-zinc-700'}`}
+                            whileHover={{ scale: 1.1 }}
+                            style={{ filter: event.status === 'current' ? 'drop-shadow(0 0 10px #3b82f6)' : 'none' }}
+                          >
+                            <motion.div 
+                              className={`w-[30px] h-[30px] rounded-full flex items-center justify-center
+                                ${event.status === 'current' 
+                                  ? 'bg-white' 
+                                  : 'bg-zinc-600'}`}
+                            >
+                              <span className="text-xs font-bold">
+                                {index + 1}
+                              </span>
+                            </motion.div>
+                          </motion.div>
+                        </div>
+
+                        {/* Content */}
+                        <div className={`pt-24 ${index % 2 === 0 ? 'block' : 'block'}`}>
+                          <motion.div
+                            className="bg-zinc-800/50 rounded-xl p-6 backdrop-blur-sm border border-zinc-700/50
+                              hover:border-blue-500/50 transition-colors cursor-pointer"
+                            whileHover={{ 
+                              y: -5,
+                              boxShadow: '0 0 20px rgba(59, 130, 246, 0.2)'
+                            }}
+                            onClick={() => handleCheckpointClick(event)}
+                          >
+                            <div className={`font-bold text-xl mb-2 ${
+                              event.status === 'current' ? 'text-blue-400' : 'text-zinc-300'
+                            }`}>
+                              {event.phase}
+                            </div>
+                            <div className="text-zinc-400 text-sm mb-2">
+                              {new Date(event.date).toLocaleDateString()}
+                              <span className="mx-2">•</span>
+                              {event.startTime} - {event.endTime}
+                              <span className="ml-2 text-zinc-500">({event.duration}h)</span>
+                            </div>
+                            <p className="text-zinc-500 text-sm">{event.description}</p>
+                          </motion.div>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           </motion.div>
@@ -181,6 +367,105 @@ const TeamConfirmation = ({ params }) => {
           </div>
         </motion.div>
       </div>
+
+      {/* Document Upload Modal */}
+      {showDocumentModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-zinc-900 rounded-xl p-6 max-w-lg w-full mx-4">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold">Document Submission</h2>
+              <button
+                onClick={() => setShowDocumentModal(false)}
+                className="text-zinc-400 hover:text-white"
+              >
+                <XMarkIcon className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="border-2 border-dashed border-zinc-700 rounded-lg p-4 text-center">
+                <input
+                  type="file"
+                  multiple
+                  className="hidden"
+                  id="document-upload"
+                  onChange={(e) => handleDocumentSubmission(Array.from(e.target.files))}
+                  disabled={isUploading}
+                />
+                <label
+                  htmlFor="document-upload"
+                  className={`cursor-pointer block ${isUploading ? 'opacity-50' : ''}`}
+                >
+                  <div className="text-zinc-400">
+                    <svg className="mx-auto h-12 w-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
+                    <p className="text-sm">
+                      {isUploading ? 'Uploading...' : 'Drop files here or click to upload'}
+                    </p>
+                    <p className="text-xs mt-1">Supported formats: PDF, DOC, DOCX</p>
+                  </div>
+                </label>
+              </div>
+
+              {/* Upload Progress */}
+              {Object.keys(uploadProgress).length > 0 && (
+                <div className="space-y-2">
+                  {Object.entries(uploadProgress).map(([fileName, progress]) => (
+                    <div key={fileName} className="text-sm">
+                      <div className="flex justify-between mb-1">
+                        <span className="text-zinc-400">{fileName}</span>
+                        <span className="text-zinc-400">{progress}%</span>
+                      </div>
+                      <div className="w-full bg-zinc-700 rounded-full h-1.5">
+                        <div
+                          className="bg-blue-500 h-1.5 rounded-full transition-all duration-300"
+                          style={{ width: `${progress}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {uploadError && (
+                <div className="text-red-500 text-sm p-2 bg-red-500/10 rounded-lg">
+                  {uploadError}
+                </div>
+              )}
+
+              {documents.length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium text-zinc-400">Uploaded Documents</h4>
+                  {documents.map((doc) => (
+                    <div key={doc.id} className="flex items-center justify-between bg-zinc-800 rounded-lg p-2">
+                      <div className="flex items-center space-x-2">
+                        <span className="text-sm truncate">{doc.name}</span>
+                        <span className={`text-xs px-2 py-0.5 rounded-full ${
+                          doc.status === 'approved' ? 'bg-green-500/20 text-green-400' :
+                          doc.status === 'rejected' ? 'bg-red-500/20 text-red-400' :
+                          'bg-yellow-500/20 text-yellow-400'
+                        }`}>
+                          {doc.status}
+                        </span>
+                      </div>
+                      <a
+                        href={doc.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-400 hover:text-blue-300"
+                      >
+                        View
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
