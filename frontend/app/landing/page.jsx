@@ -30,11 +30,13 @@ export default function Home() {
     {
       title: 'Organize a Hackathon',
       description: 'Create and manage your own hackathon events',
+      icon: '🎯',
       path: '/organizer/register',
     },
     {
       title: 'Participate',
       description: 'Join exciting hackathons and showcase your skills',
+      icon: '👥',
       path: '/participant/register',
     },
     {
@@ -46,6 +48,7 @@ export default function Home() {
     {
       title: 'Sponsor Hackathon',
       description: 'Support innovation and connect with talent',
+      icon: '🌟',
       path: '/sponsor/register',
     }
   ];
@@ -247,26 +250,30 @@ export default function Home() {
         </div>
       </div>
 
-      <main className={styles.main}>
-      <motion.div 
-        className={styles.mask}
-        animate={{
-          WebkitMaskPosition: `${x - (size/2)}px ${y - (size/2)}px`,
-          WebkitMaskSize: `${size}px`,
-        }}
-        transition={{ type: "tween", ease: "backOut", duration:0.5}}
-      >
-          <p onMouseEnter={() => {setIsHovered(true)}} onMouseLeave={() => {setIsHovered(false)}}>
-            A visual designer - with skills that haven't been replaced by A.I (yet) - making good shit only if the paycheck is equally good.
-          </p>
-      </motion.div>
+      {/* Visual Designer Section */}
+      <div className="relative">
+        <div className="max-w-7xl mx-auto">
+          <main className={styles.main}>
+            <motion.div 
+              className={styles.mask}
+              animate={{
+                WebkitMaskPosition: `${x - (size/2)}px ${y - (size/2)}px`,
+                WebkitMaskSize: `${size}px`,
+              }}
+              transition={{ type: "tween", ease: "backOut", duration:0.5}}
+            >
+              <p onMouseEnter={() => {setIsHovered(true)}} onMouseLeave={() => {setIsHovered(false)}}>
+                A visual designer - with skills that haven't been replaced by A.I (yet) - making good shit only if the paycheck is equally good.
+              </p>
+            </motion.div>
 
-      <div className={styles.body}>
-        <p>I'm a <span>selectively skilled</span> product designer with strong focus on producing high quality & impactful digital experience.</p>
+            <div className={styles.body}>
+              <p>I'm a <span>selectively skilled</span> product designer with strong focus on producing high quality & impactful digital experience.</p>
+            </div>
+          </main>
+        </div>
       </div>
 
-    </main>
-      
       {/* Buttons Grid */}
       <div className="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
@@ -280,9 +287,7 @@ export default function Home() {
             >
               <button
                 onClick={() => router.push(button.path)}
-                className="w-full h-full bg-zinc-900 border border-zinc-800 rounded-xl p-8 transition-all duration-300
-                         hover:bg-zinc-800 text-white group-hover:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)]
-                         flex flex-col items-center text-center"
+                className="w-full h-full bg-zinc-900 border border-zinc-800 rounded-xl p-8 transition-all duration-300 hover:bg-zinc-800 text-white group-hover:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)] flex flex-col items-center text-center"
               >
                 <div className="text-4xl mb-4 transform transition-transform duration-300 group-hover:scale-110">
                   {button.icon}

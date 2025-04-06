@@ -1,6 +1,5 @@
 'use client';
 
-import { Geist, Geist_Mono } from "next/font/google";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
@@ -18,14 +17,10 @@ const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${inter.variable} antialiased`}>
         <Providers>
           {children}
         </Providers>
-      <body className={`${inter.variable} antialiased`}>
-        {children}
       </body>
     </html>
   );

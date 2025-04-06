@@ -9,9 +9,7 @@ const nextConfig = {
     };
     return config;
   },
-  experimental: {
-    serverComponentsExternalPackages: ['undici'],
-  },
+  serverExternalPackages: ['undici'],
 }
 
 module.exports = nextConfig 
