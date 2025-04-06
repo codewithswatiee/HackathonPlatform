@@ -1,9 +1,11 @@
 'use client';
 
+import { setCredentials } from '@/redux/features/authSlice';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
 
 const ParticipantRegistration = () => {
   const router = useRouter();
@@ -50,6 +52,8 @@ const ParticipantRegistration = () => {
     'Game Development'
   ];
 
+
+  const dispatch = useDispatch()
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -207,6 +211,10 @@ const ParticipantRegistration = () => {
         country: formData.country,
         resume: formData.resume || ""
       });
+
+      dispatch(setCredentials({
+        user: response.data.user,
+      }));
 
       if(response.status !== 201){
         alert(response.data.error || "Error while creating account")

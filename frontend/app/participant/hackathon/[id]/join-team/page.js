@@ -1,15 +1,19 @@
 'use client';
 
-import { useState } from 'react';
+import { use, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
+import { useSelector } from 'react-redux';
+import axios from 'axios';
 
 const JoinTeam = ({ params }) => {
   const router = useRouter();
   const [teamCode, setTeamCode] = useState('');
   const [error, setError] = useState('');
+  const participantId = useSelector(state => state.auth.user)
+  const { id: hackathonId } = use(params);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async(e) => {
     e.preventDefault();
     if (!teamCode.trim()) {
       setError('Please enter a team code');
@@ -17,7 +21,20 @@ const JoinTeam = ({ params }) => {
     }
     // Here you would validate the team code with your backend
     // For now, we'll simulate a successful join
-    router.push(`/participant/hackathon/${params.id}/create-team?code=${teamCode}`);
+
+    const response = await axios.post('http://localhost:7000/api/participant/register-hackathon', {
+      teamCode,
+      hackathonId,
+      participantId,
+      role: 'member'
+    })
+
+    if(response.data.error){
+      alert('Something went wrong! Please try later');
+    }
+
+    alert(response.data.message)
+    router.push(`/participant/hackathon/${hackathonId}/create-team?code=${teamCode}`);
   };
 
   return (

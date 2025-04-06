@@ -146,7 +146,7 @@ const registerParticipant = async (req, res) => {
         res.status(201).json({
             success: true,
             message: 'Participant registered successfully',
-            participant: participantResponse._id
+            participant: participantResponse
         });
     } catch (error) {
         console.error('Error in registerParticipant:', error);

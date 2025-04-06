@@ -88,6 +88,30 @@ const participateInHackathon = async (req, res) => {
             team.teamMembers.push({ memberId: participantId });
             await team.save();
 
+            const updatedHackathon = await Hackathon.findByIdAndUpdate(
+                hackathonId,{ $inc: { currentParticipants: 1 } },
+                { new: true }   
+            )
+
+            if (!updatedHackathon) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Hackathon not found',
+                });
+            }
+
+            const updatedParticipant = await Participant.findByIdAndUpdate(
+                participantId,
+                { $addToSet: { registeredHackathons: hackathonId } },
+                { new: true }
+            );
+            if (!updatedParticipant) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Participant not found',
+                });
+            }
+
             return res.status(200).json({
                 success: true,
                 message: 'You have successfully joined the team',
@@ -112,6 +136,7 @@ const participateInHackathon = async (req, res) => {
 const fetchTeam  = async (req, res) => {
     const { participantId, hackathonId } = req.body;
     console.log('Participant ID:', participantId);
+    console.log('Hackathon ID:', hackathonId);
     try {
         if(!participantId || !hackathonId) {
             return res.status(400).json({
@@ -166,6 +191,8 @@ const fetchTeam  = async (req, res) => {
                 email: member.memberId.email,
             })),
         };
+
+        console.log(teamDetails)
 
         return res.status(200).json({
             success: true,
