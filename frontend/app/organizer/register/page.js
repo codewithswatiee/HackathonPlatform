@@ -55,190 +55,178 @@ export default function OrganizerRegistration() {
   return (
     <>
       <Head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Lilita+One&display=swap" rel="stylesheet" />
       </Head>
       
-      <div className="min-h-screen bg-zinc-900 py-12 px-4 sm:px-6 lg:px-8" style={{ fontFamily: 'Lilita One, cursive' }}>
-        <div className="max-w-3xl mx-auto p-8">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-white">Organizer Registration</h2>
-            <p className="mt-2 text-white">Create your organizer account to start hosting hackathons</p>
+      <div className="flex items-center justify-center min-h-screen bg-zinc-900 py-8 px-6" style={{ fontFamily: '"Lilita One", cursive' }}>
+        <div className="w-full max-w-4xl bg-zinc-800 rounded-2xl shadow-xl p-8">
+          <div className="text-center mb-6">
+            <h2 className="text-3xl font-normal text-white tracking-wide">ORGANIZER REGISTRATION</h2>
+            <p className="mt-2 text-gray-300 text-sm">Create your account to start hosting hackathons</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-6">
-              <h3 className="text-xl font-semibold text-white pb-2">Personal Information</h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleChange}
-                      required
-                      placeholder="Full Name"
-                      className="pl-10 pr-4 py-3 w-full rounded-full bg-[#777777] border-none text-white placeholder-white shadow-sm focus:outline-none"
-                    />
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <span className="text-white">👤</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      name="username"
-                      value={formData.username}
-                      onChange={handleChange}
-                      required
-                      placeholder="Username"
-                      className="pl-10 pr-4 py-3 w-full rounded-full bg-[#777777] border-none text-white placeholder-white shadow-sm focus:outline-none"
-                    />
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <span className="text-white">@</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <div className="relative">
-                    <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      required
-                      placeholder="Email ID"
-                      className="pl-10 pr-4 py-3 w-full rounded-full bg-[#777777] border-none text-white placeholder-white shadow-sm focus:outline-none"
-                    />
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <span className="text-white">✉️</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <div className="relative">
-                    <input
-                      type="password"
-                      name="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      required
-                      placeholder="Password"
-                      className="pl-10 pr-4 py-3 w-full rounded-full bg-[#777777] border-none text-white placeholder-white shadow-sm focus:outline-none"
-                    />
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <span className="text-white">🔒</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <div className="relative">
-                    <input
-                      type="password"
-                      name="confirmPassword"
-                      value={formData.confirmPassword}
-                      onChange={handleChange}
-                      required
-                      placeholder="Confirm Password"
-                      className="pl-10 pr-4 py-3 w-full rounded-full bg-[#777777] border-none text-white placeholder-white shadow-sm focus:outline-none"
-                    />
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <span className="text-white">🔒</span>
-                    </div>
-                  </div>
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* First row with name field */}
+            <div className="grid grid-cols-1 gap-5">
+              <div className="relative">
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
+                  placeholder="Full Name"
+                  className="pl-12 pr-4 py-3 w-full rounded-full bg-[#666666] border-none text-white placeholder-white shadow-sm focus:outline-none text-lg"
+                />
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <span className="text-white text-xl">👤</span>
                 </div>
               </div>
-            </div>
-
-            <div className="space-y-6">
-              <h3 className="text-xl font-semibold text-white pb-2">Organization Details</h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      name="organizationName"
-                      value={formData.organizationName}
-                      onChange={handleChange}
-                      required
-                      placeholder="Organization Name"
-                      className="pl-10 pr-4 py-3 w-full rounded-full bg-[#777777] border-none text-white placeholder-white shadow-sm focus:outline-none"
-                    />
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <span className="text-white">🏢</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <div className="relative">
-                    <select
-                      name="organizationType"
-                      value={formData.organizationType}
-                      onChange={handleChange}
-                      required
-                      className="pl-10 pr-4 py-3 w-full rounded-full bg-[#777777] border-none text-white shadow-sm focus:outline-none appearance-none"
-                    >
-                      <option value="" disabled>Select Organization Type</option>
-                      <option value="company">Company</option>
-                      <option value="college">College</option>
-                      <option value="committee">Committee</option>
-                      <option value="other">Other</option>
-                    </select>
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <span className="text-white">📋</span>
-                    </div>
-                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                      <span className="text-white">▼</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="md:col-span-2">
-                  <div className="relative">
-                    <textarea
-                      name="description"
-                      value={formData.description}
-                      onChange={handleChange}
-                      required
-                      placeholder="Organization Description"
-                      rows="4"
-                      className="pl-10 pr-4 py-3 w-full rounded-3xl bg-[#777777] border-none text-white placeholder-white shadow-sm focus:outline-none resize-none"
-                    />
-                    <div className="absolute top-3 left-0 pl-3 flex items-start pointer-events-none">
-                      <span className="text-white">📝</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex justify-center pt-6">
-              <button
-                type="submit"
-                onClick={handleSubmit}
-                className="px-6 py-3 w-full max-w-xs rounded-full bg-white text-[#e74c3c] text-xl font-bold hover:bg-gray-100 focus:outline-none transition-all"
-              >
-                SIGN UP
-              </button>
             </div>
             
-            <div className="text-center">
-              <button
-                type="button"
-                onClick={() => router.push('/')}
-                className="text-white underline"
-              >
-                Cancel and return home
-              </button>
+            {/* Second row with username, email, org name in one line */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              <div className="relative">
+                <input
+                  type="text"
+                  name="username"
+                  value={formData.username}
+                  onChange={handleChange}
+                  required
+                  placeholder="Username"
+                  className="pl-12 pr-4 py-3 w-full rounded-full bg-[#666666] border-none text-white placeholder-white shadow-sm focus:outline-none text-lg"
+                />
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <span className="text-white text-xl">@</span>
+                </div>
+              </div>
+
+              <div className="relative">
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                  placeholder="Email ID"
+                  className="pl-12 pr-4 py-3 w-full rounded-full bg-[#666666] border-none text-white placeholder-white shadow-sm focus:outline-none text-lg"
+                />
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <span className="text-white text-xl">✉️</span>
+                </div>
+              </div>
+
+              <div className="relative">
+                <input
+                  type="text"
+                  name="organizationName"
+                  value={formData.organizationName}
+                  onChange={handleChange}
+                  required
+                  placeholder="Organization Name"
+                  className="pl-12 pr-4 py-3 w-full rounded-full bg-[#666666] border-none text-white placeholder-white shadow-sm focus:outline-none text-lg"
+                />
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <span className="text-white text-xl">🏢</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Third row with password and confirm password */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="relative">
+                <input
+                  type="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                  placeholder="Password"
+                  className="pl-12 pr-4 py-3 w-full rounded-full bg-[#666666] border-none text-white placeholder-white shadow-sm focus:outline-none text-lg"
+                />
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <span className="text-white text-xl">🔒</span>
+                </div>
+              </div>
+
+              <div className="relative">
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  required
+                  placeholder="Confirm Password"
+                  className="pl-12 pr-4 py-3 w-full rounded-full bg-[#666666] border-none text-white placeholder-white shadow-sm focus:outline-none text-lg"
+                />
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <span className="text-white text-xl">🔒</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Fourth row with org type and description */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+              <div className="relative">
+                <select
+                  name="organizationType"
+                  value={formData.organizationType}
+                  onChange={handleChange}
+                  required
+                  className="pl-12 pr-4 py-3 w-full rounded-full bg-[#666666] border-none text-white shadow-sm focus:outline-none appearance-none text-lg"
+                >
+                  <option value="" disabled>Organization Type</option>
+                  <option value="company">Company</option>
+                  <option value="college">College</option>
+                  <option value="committee">Committee</option>
+                  <option value="other">Other</option>
+                </select>
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <span className="text-white text-xl">📋</span>
+                </div>
+                <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                  <span className="text-white text-lg">▼</span>
+                </div>
+              </div>
+
+              <div className="md:col-span-3">
+                <div className="relative">
+                  <input
+                    name="description"
+                    value={formData.description}
+                    onChange={handleChange}
+                    required
+                    placeholder="Organization Description"
+                    className="pl-12 pr-4 py-3 w-full rounded-full bg-[#666666] border-none text-white placeholder-white shadow-sm focus:outline-none text-lg"
+                  />
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <span className="text-white text-xl">📝</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 pt-5 mt-3">
+              <div>
+                <button
+                  type="button"
+                  onClick={() => router.push('/')}
+                  className="w-full py-3 rounded-full bg-gray-700 text-white text-xl hover:bg-gray-600 focus:outline-none transition-all"
+                >
+                  CANCEL
+                </button>
+              </div>
+              <div className="md:col-span-2">
+                <button
+                  type="submit"
+                  onClick={handleSubmit}
+                  className="w-full py-3 rounded-full bg-white text-[#e74c3c] text-xl font-normal hover:bg-gray-100 focus:outline-none transition-all"
+                >
+                  SIGN UP
+                </button>
+              </div>
             </div>
           </form>
         </div>
