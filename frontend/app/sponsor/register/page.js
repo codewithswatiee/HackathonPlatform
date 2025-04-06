@@ -1,6 +1,5 @@
 "use client"
 
-import { motion } from "framer-motion"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 
@@ -41,210 +40,221 @@ export default function SponsorRegistration() {
     router.push("/sponsor/dashboard")
   }
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
-    },
-  }
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 },
-  }
-
   return (
-    <div className="min-h-screen bg-black text-white py-12 px-4 sm:px-6 lg:px-8">
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="max-w-3xl mx-auto bg-zinc-900 rounded-lg shadow-lg p-8 border border-zinc-800"
-      >
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold">Sponsor Registration</h2>
-          <p className="mt-2 text-zinc-400">Support innovation and connect with talented developers</p>
-        </div>
+    <main className="min-h-screen bg-zinc-900 font-['Lilita_One']">
+      {/* Google Fonts Import */}
+      <style jsx global>{`
+        @import url('https://fonts.googleapis.com/css2?family=Lilita+One&display=swap');
+      `}</style>
+      
+      <div className="flex items-center justify-center min-h-screen py-8 px-6">
+        <div className="w-full max-w-4xl bg-zinc-800 rounded-2xl shadow-xl p-8">
+          <div className="text-center mb-6">
+            <h2 className="text-3xl text-white tracking-tight">SPONSOR REGISTRATION</h2>
+            <p className="mt-2 text-gray-300 text-sm font-sans">Support innovation and connect with talented developers</p>
+          </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            className="space-y-6"
-          >
-            <motion.div variants={itemVariants} className="space-y-6">
-              <h3 className="text-xl font-semibold border-b border-zinc-800 pb-2">Personal Information</h3>
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="space-y-5">
+              <h3 className="text-xl text-white pb-2">Personal Information</h3>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-zinc-300">Full Name *</label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div className="relative">
                   <input
                     type="text"
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
                     required
-                    className="mt-1 block w-full rounded-md bg-zinc-800 border-zinc-700 text-white shadow-sm focus:border-white focus:ring-white"
+                    placeholder="Full Name"
+                    className="pl-12 pr-4 py-3 w-full rounded-full bg-[#666666] border-none text-white placeholder-white shadow-sm focus:outline-none text-lg"
                   />
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <span className="text-white text-xl">👤</span>
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-zinc-300">Username *</label>
+                <div className="relative">
                   <input
                     type="text"
                     name="username"
                     value={formData.username}
                     onChange={handleChange}
                     required
-                    className="mt-1 block w-full rounded-md bg-zinc-800 border-zinc-700 text-white shadow-sm focus:border-white focus:ring-white"
+                    placeholder="Username"
+                    className="pl-12 pr-4 py-3 w-full rounded-full bg-[#666666] border-none text-white placeholder-white shadow-sm focus:outline-none text-lg"
                   />
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <span className="text-white text-xl">@</span>
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-zinc-300">Email *</label>
+                <div className="relative">
                   <input
                     type="email"
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
                     required
-                    className="mt-1 block w-full rounded-md bg-zinc-800 border-zinc-700 text-white shadow-sm focus:border-white focus:ring-white"
+                    placeholder="Email"
+                    className="pl-12 pr-4 py-3 w-full rounded-full bg-[#666666] border-none text-white placeholder-white shadow-sm focus:outline-none text-lg"
                   />
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <span className="text-white text-xl">✉️</span>
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-zinc-300">Password *</label>
+                <div className="relative">
                   <input
                     type="password"
                     name="password"
                     value={formData.password}
                     onChange={handleChange}
                     required
-                    className="mt-1 block w-full rounded-md bg-zinc-800 border-zinc-700 text-white shadow-sm focus:border-white focus:ring-white"
+                    placeholder="Password"
+                    className="pl-12 pr-4 py-3 w-full rounded-full bg-[#666666] border-none text-white placeholder-white shadow-sm focus:outline-none text-lg"
                   />
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <span className="text-white text-xl">🔒</span>
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-zinc-300">Confirm Password *</label>
+                <div className="relative">
                   <input
                     type="password"
                     name="confirmPassword"
                     value={formData.confirmPassword}
                     onChange={handleChange}
                     required
-                    className="mt-1 block w-full rounded-md bg-zinc-800 border-zinc-700 text-white shadow-sm focus:border-white focus:ring-white"
+                    placeholder="Confirm Password"
+                    className="pl-12 pr-4 py-3 w-full rounded-full bg-[#666666] border-none text-white placeholder-white shadow-sm focus:outline-none text-lg"
                   />
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <span className="text-white text-xl">🔒</span>
+                  </div>
                 </div>
               </div>
-            </motion.div>
+            </div>
 
-            <motion.div variants={itemVariants} className="space-y-6">
-              <h3 className="text-xl font-semibold border-b border-zinc-800 pb-2">Company Information</h3>
+            <div className="space-y-5">
+              <h3 className="text-xl text-white pb-2">Company Information</h3>
               
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-zinc-300">Company Name *</label>
+              <div className="space-y-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div className="relative">
                     <input
                       type="text"
                       name="companyName"
                       value={formData.companyName}
                       onChange={handleChange}
                       required
-                      className="mt-1 block w-full rounded-md bg-zinc-800 border-zinc-700 text-white shadow-sm focus:border-white focus:ring-white"
+                      placeholder="Company Name"
+                      className="pl-12 pr-4 py-3 w-full rounded-full bg-[#666666] border-none text-white placeholder-white shadow-sm focus:outline-none text-lg"
                     />
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <span className="text-white text-xl">🏢</span>
+                    </div>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-zinc-300">Company Website *</label>
+                  <div className="relative">
                     <input
                       type="url"
                       name="companyWebsite"
                       value={formData.companyWebsite}
                       onChange={handleChange}
                       required
-                      placeholder="https://example.com"
-                      className="mt-1 block w-full rounded-md bg-zinc-800 border-zinc-700 text-white shadow-sm focus:border-white focus:ring-white"
+                      placeholder="Company Website"
+                      className="pl-12 pr-4 py-3 w-full rounded-full bg-[#666666] border-none text-white placeholder-white shadow-sm focus:outline-none text-lg"
                     />
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <span className="text-white text-xl">🌐</span>
+                    </div>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-zinc-300">Industry *</label>
+                  <div className="relative">
                     <select
                       name="industry"
                       value={formData.industry}
                       onChange={handleChange}
                       required
-                      className="mt-1 block w-full rounded-md bg-zinc-800 border-zinc-700 text-white shadow-sm focus:border-white focus:ring-white"
+                      className="pl-12 pr-4 py-3 w-full rounded-full bg-[#666666] border-none text-white shadow-sm focus:outline-none appearance-none text-lg"
                     >
-                      <option value="">Select Industry</option>
+                      <option value="">Industry</option>
                       <option value="technology">Technology</option>
                       <option value="finance">Finance</option>
                       <option value="healthcare">Healthcare</option>
                       <option value="education">Education</option>
                       <option value="other">Other</option>
                     </select>
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <span className="text-white text-xl">🏭</span>
+                    </div>
+                    <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                      <span className="text-white text-lg">▼</span>
+                    </div>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-zinc-300">Sponsorship Level *</label>
+                  <div className="relative">
                     <select
                       name="sponsorshipLevel"
                       value={formData.sponsorshipLevel}
                       onChange={handleChange}
                       required
-                      className="mt-1 block w-full rounded-md bg-zinc-800 border-zinc-700 text-white shadow-sm focus:border-white focus:ring-white"
+                      className="pl-12 pr-4 py-3 w-full rounded-full bg-[#666666] border-none text-white shadow-sm focus:outline-none appearance-none text-lg"
                     >
-                      <option value="">Select Level</option>
+                      <option value="">Sponsorship Level</option>
                       <option value="platinum">Platinum</option>
                       <option value="gold">Gold</option>
                       <option value="silver">Silver</option>
                       <option value="bronze">Bronze</option>
                     </select>
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <span className="text-white text-xl">💰</span>
+                    </div>
+                    <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                      <span className="text-white text-lg">▼</span>
+                    </div>
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-zinc-300">Areas of Interest</label>
+                <div className="relative">
                   <textarea
                     name="interests"
                     value={formData.interests}
                     onChange={handleChange}
-                    placeholder="What types of hackathons are you interested in sponsoring? (e.g., AI/ML, Web3, Sustainability)"
+                    placeholder="Areas of Interest (e.g., AI/ML, Web3, Sustainability)"
                     rows="3"
-                    className="mt-1 block w-full rounded-md bg-zinc-800 border-zinc-700 text-white shadow-sm focus:border-white focus:ring-white"
+                    className="pl-12 pr-4 py-3 w-full rounded-3xl bg-[#666666] border-none text-white placeholder-white shadow-sm focus:outline-none text-lg resize-none"
                   />
+                  <div className="absolute top-3 left-0 pl-4 flex items-start pointer-events-none">
+                    <span className="text-white text-xl">🎯</span>
+                  </div>
                 </div>
               </div>
-            </motion.div>
-          </motion.div>
+            </div>
 
-          <div className="flex justify-between pt-6 border-t border-zinc-800">
-            <motion.button
-              type="button"
-              onClick={() => router.push('/')}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="px-6 py-2 border border-zinc-700 rounded-md text-sm font-medium text-white hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-zinc-900 focus:ring-white"
-            >
-              Cancel
-            </motion.button>
-            
-            <motion.button
-              type="submit"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-black bg-white hover:bg-zinc-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-zinc-900 focus:ring-white"
-            >
-              Register
-            </motion.button>
-          </div>
-        </form>
-      </motion.div>
-    </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 pt-5 mt-3">
+              <div>
+                <button
+                  type="button"
+                  onClick={() => router.push('/')}
+                  className="w-full py-3 rounded-full bg-gray-700 text-white text-xl hover:bg-gray-600 focus:outline-none transition-all"
+                >
+                  CANCEL
+                </button>
+              </div>
+              <div className="md:col-span-2">
+                <button
+                  type="submit"
+                  className="w-full py-3 rounded-full bg-white text-[#e74c3c] text-xl hover:bg-gray-100 focus:outline-none transition-all"
+                >
+                  SIGN UP
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
   )
 } 

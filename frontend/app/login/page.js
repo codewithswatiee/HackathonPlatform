@@ -1,10 +1,17 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useDispatch } from 'react-redux';
 import { setCredentials } from '@/redux/features/authSlice';
 import axios from 'axios';
+import { Lilita_One } from 'next/font/google';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { useDispatch } from 'react-redux';
+
+const lilitaOne = Lilita_One({ 
+  weight: '400', 
+  subsets: ['latin'],
+  display: 'swap',
+});
 
 const Login = () => {
   const router = useRouter();
@@ -21,6 +28,10 @@ const Login = () => {
       ...formData,
       [e.target.name]: e.target.value,
     });
+  };
+
+  const handleCancel = () => {
+    router.push('/');
   };
 
   const handleSubmit = async (e) => {
@@ -53,62 +64,85 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center px-4">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
-            Sign in to your account
-          </h2>
-        </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+    <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/40">
+      <div className="bg-zinc-600/90 backdrop-blur-sm rounded-lg shadow-2xl max-w-md w-full p-8 relative">
+        <button 
+          onClick={handleCancel}
+          className="absolute top-3 right-3 text-gray-300 hover:text-white"
+          aria-label="Close"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+        <form className="space-y-6" onSubmit={handleSubmit}>
           {error && (
             <div className="bg-red-500/10 border border-red-500 text-red-500 px-4 py-3 rounded relative" role="alert">
               <span className="block sm:inline">{error}</span>
             </div>
           )}
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div>
-              <label htmlFor="email" className="sr-only">Email address</label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-zinc-700 bg-zinc-900 placeholder-zinc-500 text-white rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Email address"
-                value={formData.email}
-                onChange={handleChange}
-              />
+          <div className="space-y-4">
+            <div className="relative">
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
+                  className="appearance-none rounded-full w-full pl-12 pr-3 py-4 border-0 bg-zinc-700 placeholder-zinc-400 text-white focus:outline-none focus:ring-2 focus:ring-zinc-500 text-lg"
+                  placeholder="Email ID"
+                  value={formData.email}
+                  onChange={handleChange}
+                />
+              </div>
             </div>
-            <div>
-              <label htmlFor="password" className="sr-only">Password</label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-zinc-700 bg-zinc-900 placeholder-zinc-500 text-white rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Password"
-                value={formData.password}
-                onChange={handleChange}
-              />
+            <div className="relative">
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                </div>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  required
+                  className="appearance-none rounded-full w-full pl-12 pr-3 py-4 border-0 bg-zinc-700 placeholder-zinc-400 text-white focus:outline-none focus:ring-2 focus:ring-zinc-500 text-lg"
+                  placeholder="Password"
+                  value={formData.password}
+                  onChange={handleChange}
+                />
+              </div>
             </div>
           </div>
 
-          <div>
+          <div className="mt-10 flex space-x-4">
+            <button
+              type="button"
+              onClick={handleCancel}
+              className={`${lilitaOne.className} w-1/2 flex justify-center py-4 px-4 border-0 text-lg font-medium rounded-full text-white bg-gray-500 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500`}
+            >
+              CANCEL
+            </button>
             <button
               type="submit"
               disabled={loading}
-              className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white ${
-                loading ? 'bg-blue-600 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'
-              } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`}
+              className={`${lilitaOne.className} w-1/2 flex justify-center py-4 px-4 border-0 text-lg font-medium rounded-full text-white ${
+                loading ? 'bg-red-400 cursor-not-allowed' : 'bg-red-500 hover:bg-red-600'
+              } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500`}
             >
               {loading ? (
                 <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-              ) : 'Sign in'}
+              ) : 'SIGN IN'}
             </button>
           </div>
         </form>
