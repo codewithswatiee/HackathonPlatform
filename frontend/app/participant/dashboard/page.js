@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { motion, useScroll, useTransform, useSpring, useAnimationFrame } from 'framer-motion';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { useRouter } from 'next/navigation';
-import axios from 'axios';
-import { useSelector } from 'react-redux';
 import { selectCurrentUser } from '@/redux/features/authSlice';
+import axios from 'axios';
+import { motion, useAnimationFrame } from 'framer-motion';
+import { useRouter } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
 
 const ParticipantDashboard = () => {
   const router = useRouter();
@@ -91,7 +91,7 @@ const ParticipantDashboard = () => {
     { month: 'Jun', completed: 0, upcoming: 1 },
   ];
 
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
+  const COLORS = ['#4ADE80', '#F472B6', '#60A5FA', '#FBBF24', '#A78BFA'];
 
   const filteredHackathons = selectedFilter === 'all' 
     ? hackathons 
@@ -213,11 +213,16 @@ const ParticipantDashboard = () => {
   }, [scrollY]);
 
   return (
-    <div className="min-h-screen bg-black text-white py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-zinc-900 text-white py-12 px-4 sm:px-6 lg:px-8 font-['Lilita_One']">
+      {/* Google Fonts Import */}
+      <style jsx global>{`
+        @import url('https://fonts.googleapis.com/css2?family=Lilita+One&display=swap');
+      `}</style>
+      
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">Hackathon Dashboard</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Hackathon Dashboard</h1>
           <div className="flex items-center space-x-4">
             {/* Notification Bell */}
             <div className="relative">
@@ -231,7 +236,7 @@ const ParticipantDashboard = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                 </svg>
                 {notifications.some(n => n.unread) && (
-                  <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500 transform translate-x-1 -translate-y-1"></span>
+                  <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-orange-500 transform translate-x-1 -translate-y-1"></span>
                 )}
               </motion.button>
 
@@ -268,7 +273,7 @@ const ParticipantDashboard = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setShowProfile(true)}
-              className="px-4 py-2 bg-zinc-800 rounded-lg border border-zinc-700 hover:bg-zinc-700 transition-colors flex items-center"
+              className="px-4 py-2 bg-zinc-800 rounded-full border border-zinc-700 hover:bg-zinc-700 transition-colors flex items-center"
             >
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -285,18 +290,18 @@ const ParticipantDashboard = () => {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="lg:col-span-2 bg-zinc-900 rounded-xl p-6 shadow-lg border border-zinc-800"
+            className="lg:col-span-2 bg-zinc-800 rounded-xl p-6 shadow-lg border border-zinc-700"
           >
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
               <div className="flex items-center mb-4 md:mb-0">
                 <div className="relative w-20 h-20 mr-4">
-                  <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 animate-pulse"></div>
-                  <div className="absolute inset-1 rounded-full bg-black flex items-center justify-center">
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-r from-orange-500 to-pink-500 animate-pulse"></div>
+                  <div className="absolute inset-1 rounded-full bg-zinc-900 flex items-center justify-center">
                     <span className="text-2xl font-bold">JD</span>
                   </div>
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold">John Doe</h2>
+                  <h2 className="text-xl font-bold tracking-tight">John Doe</h2>
                   <p className="text-zinc-400">Hackathon Enthusiast</p>
                 </div>
               </div>
@@ -305,7 +310,7 @@ const ParticipantDashboard = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setShowProfile(true)}
-                className="px-4 py-2 bg-zinc-800 rounded-lg border border-zinc-700 hover:bg-zinc-700 transition-colors flex items-center"
+                className="px-4 py-2 bg-zinc-800 rounded-full border border-zinc-700 hover:bg-zinc-700 transition-colors flex items-center"
               >
                 <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -319,24 +324,24 @@ const ParticipantDashboard = () => {
                 <span className="text-zinc-400">Level {userStats.level}</span>
                 <span className="text-zinc-400">{userStats.experience}/{userStats.nextLevel} XP</span>
               </div>
-              <div className="w-full bg-zinc-800 rounded-full h-2">
+              <div className="w-full bg-zinc-700 rounded-full h-2">
                 <div 
-                  className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"
+                  className="h-full bg-gradient-to-r from-orange-500 to-pink-500 rounded-full"
                   style={{ width: `${(userStats.experience / userStats.nextLevel) * 100}%` }}
                 ></div>
               </div>
             </div>
             
             <div className="mt-6 flex flex-wrap gap-4">
-              <div className="bg-zinc-800 rounded-lg p-4 flex-1 min-w-[120px] text-center border border-zinc-700">
+              <div className="bg-zinc-700 rounded-lg p-4 flex-1 min-w-[120px] text-center border border-zinc-600">
                 <div className="text-2xl font-bold">{userStats.completedHackathons}</div>
                 <div className="text-sm text-zinc-400">Completed</div>
               </div>
-              <div className="bg-zinc-800 rounded-lg p-4 flex-1 min-w-[120px] text-center border border-zinc-700">
+              <div className="bg-zinc-700 rounded-lg p-4 flex-1 min-w-[120px] text-center border border-zinc-600">
                 <div className="text-2xl font-bold">{userStats.streak}</div>
                 <div className="text-sm text-zinc-400">Day Streak</div>
               </div>
-              <div className="bg-zinc-800 rounded-lg p-4 flex-1 min-w-[120px] text-center border border-zinc-700">
+              <div className="bg-zinc-700 rounded-lg p-4 flex-1 min-w-[120px] text-center border border-zinc-600">
                 <div className="text-2xl font-bold">3</div>
                 <div className="text-sm text-zinc-400">Upcoming</div>
               </div>
@@ -351,7 +356,7 @@ const ParticipantDashboard = () => {
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     transition={{ delay: index * 0.1 }}
-                    className="px-3 py-1 bg-zinc-800 rounded-full text-xs border border-zinc-700"
+                    className="px-3 py-1 bg-zinc-700 rounded-full text-xs border border-zinc-600"
                   >
                     {badge}
                   </motion.div>
@@ -365,9 +370,9 @@ const ParticipantDashboard = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="bg-zinc-900 rounded-xl p-6 shadow-lg border border-zinc-800"
+            className="bg-zinc-800 rounded-xl p-6 shadow-lg border border-zinc-700"
           >
-            <h2 className="text-xl font-bold mb-4">Related Internships</h2>
+            <h2 className="text-xl font-bold tracking-tight mb-4">Related Internships</h2>
             <motion.div
               ref={scrollRef}
               onMouseEnter={() => setShouldAutoScroll(false)}
@@ -382,7 +387,7 @@ const ParticipantDashboard = () => {
                 <motion.div
                   key={`${internship.id}-${index}`}
                   whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
-                  className="p-4 bg-zinc-800 rounded-lg border border-zinc-700"
+                  className="p-4 bg-zinc-700 rounded-lg border border-zinc-600"
                   style={{
                     opacity: 1,
                     transition: 'opacity 0.3s ease'
@@ -390,7 +395,7 @@ const ParticipantDashboard = () => {
                 >
                   <div className="flex justify-between items-start">
                     <h3 className="font-semibold">{internship.position}</h3>
-                    <span className="text-xs px-2 py-1 bg-zinc-700 rounded-full">
+                    <span className="text-xs px-2 py-1 bg-zinc-600 rounded-full">
                       {internship.type}
                     </span>
                   </div>
@@ -406,7 +411,7 @@ const ParticipantDashboard = () => {
                     {internship.skills.map((skill, skillIndex) => (
                       <span 
                         key={skillIndex}
-                        className="text-xs px-2 py-1 bg-zinc-700 rounded-full"
+                        className="text-xs px-2 py-1 bg-zinc-600 rounded-full"
                       >
                         {skill}
                       </span>
@@ -415,7 +420,7 @@ const ParticipantDashboard = () => {
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="mt-3 w-full px-3 py-1.5 bg-white text-black rounded-lg text-sm font-medium hover:bg-zinc-200 transition-colors"
+                    className="mt-3 w-full px-3 py-1.5 bg-white text-black rounded-full text-sm font-medium hover:bg-zinc-200 transition-colors"
                   >
                     Apply Now
                   </motion.button>
@@ -475,7 +480,7 @@ const ParticipantDashboard = () => {
                 {/* Profile Info */}
                 <div className="bg-zinc-800 rounded-lg p-4 border border-zinc-700">
                   <div className="flex items-center space-x-4 mb-4">
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
+                    <div className="w-16 h-16 rounded-full bg-gradient-to-r from-orange-500 to-pink-500 flex items-center justify-center">
                       <span className="text-xl font-bold">JD</span>
                     </div>
                     <div>
@@ -590,7 +595,7 @@ const ParticipantDashboard = () => {
                       </div>
                       <div className="w-full bg-zinc-700 rounded-full h-2">
                         <div 
-                          className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full"
+                          className="bg-gradient-to-r from-orange-500 to-pink-500 h-2 rounded-full"
                           style={{ width: `${(userStats.experience / userStats.nextLevel) * 100}%` }}
                         ></div>
                       </div>
@@ -623,12 +628,12 @@ const ParticipantDashboard = () => {
         )}
 
         {/* Tabs for Hackathon Categories */}
-        <div className="flex space-x-2 mb-6 border-b border-zinc-800">
+        <div className="flex space-x-2 mb-6 border-b border-zinc-700">
           <button
             onClick={() => setActiveTab('upcoming')}
             className={`px-4 py-2 font-medium ${
               activeTab === 'upcoming' 
-                ? 'text-white border-b-2 border-white' 
+                ? 'text-white border-b-2 border-orange-500' 
                 : 'text-zinc-400 hover:text-white'
             }`}
           >
@@ -638,7 +643,7 @@ const ParticipantDashboard = () => {
             onClick={() => setActiveTab('registered')}
             className={`px-4 py-2 font-medium ${
               activeTab === 'registered' 
-                ? 'text-white border-b-2 border-white' 
+                ? 'text-white border-b-2 border-orange-500' 
                 : 'text-zinc-400 hover:text-white'
             }`}
           >
@@ -648,7 +653,7 @@ const ParticipantDashboard = () => {
             onClick={() => setActiveTab('completed')}
             className={`px-4 py-2 font-medium ${
               activeTab === 'completed' 
-                ? 'text-white border-b-2 border-white' 
+                ? 'text-white border-b-2 border-orange-500' 
                 : 'text-zinc-400 hover:text-white'
             }`}
           >
@@ -668,15 +673,15 @@ const ParticipantDashboard = () => {
               key={hackathon.id}
               variants={itemVariants}
               whileHover={{ scale: 1.03, boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.5)" }}
-              className="bg-zinc-900 overflow-hidden rounded-lg border border-zinc-800 hover:border-white transition-all duration-300"
+              className="bg-zinc-800 overflow-hidden rounded-lg border border-zinc-700 hover:border-orange-500 transition-all duration-300"
             >
               <div className="p-6">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-semibold">{hackathon.title}</h3>
+                  <h3 className="text-xl font-semibold tracking-tight">{hackathon.title}</h3>
                   <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                    hackathon.status === 'upcoming' ? 'bg-yellow-900 text-yellow-300' :
-                    hackathon.status === 'active' ? 'bg-green-900 text-green-300' :
-                    'bg-red-900 text-red-300'
+                    hackathon.status === 'upcoming' ? 'bg-yellow-900/30 text-yellow-300' :
+                    hackathon.status === 'active' ? 'bg-green-900/30 text-green-300' :
+                    'bg-red-900/30 text-red-300'
                   }`}>
                     {hackathon.status.charAt(0).toUpperCase() + hackathon.status.slice(1)}
                   </span>
@@ -701,15 +706,15 @@ const ParticipantDashboard = () => {
                 <p className="mt-4 text-zinc-400">{hackathon.description}</p>
                 
                 <div className="mt-4 grid grid-cols-3 gap-2 text-center">
-                  <div className="bg-zinc-800 rounded-md p-2">
+                  <div className="bg-zinc-700 rounded-md p-2">
                     <div className="text-lg font-bold">₹{hackathon.registrationFee}</div>
                     <div className="text-xs text-zinc-400">Entry Fee</div>
                   </div>
-                  <div className="bg-zinc-800 rounded-md p-2">
+                  <div className="bg-zinc-700 rounded-md p-2">
                     <div className="text-lg font-bold">₹{hackathon.points}</div>
                     <div className="text-xs text-zinc-400">Prize Pool</div>
                   </div>
-                  <div className="bg-zinc-800 rounded-md p-2">
+                  <div className="bg-zinc-700 rounded-md p-2">
                     <div className="text-lg font-bold">{hackathon.duration}</div>
                     <div className="text-xs text-zinc-400">Duration</div>
                   </div>
@@ -719,7 +724,7 @@ const ParticipantDashboard = () => {
                   <div className="text-sm text-zinc-400 mb-2">Domains:</div>
                   <div className="flex flex-wrap gap-2">
                     {hackathon.domains.map((domain, index) => (
-                      <span key={index} className="px-2 py-1 bg-zinc-800 rounded-full text-xs">
+                      <span key={index} className="px-2 py-1 bg-zinc-700 rounded-full text-xs">
                         {domain}
                       </span>
                     ))}
@@ -729,10 +734,8 @@ const ParticipantDashboard = () => {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => router.push(`/participant/hackathon/${hackathon.id}`, {
-                    state: { hackathonId: hackathon.id }
-                  })}
-                  className="mt-6 w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-black bg-white hover:bg-zinc-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-black focus:ring-white"
+                  onClick={() => router.push(`/participant/hackathon/${hackathon.id}`)}
+                  className="mt-6 w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-full text-black bg-white hover:bg-zinc-200 focus:outline-none"
                 >
                   View Details
                 </motion.button>
