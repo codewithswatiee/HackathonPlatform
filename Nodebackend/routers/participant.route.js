@@ -6,7 +6,6 @@ const { participateInHackathon, fetchTeam } = require('../controllers/participan
 
 router.post('/register', registerParticipant); // Register a new participant
 router.get('/', getAllParticipants); // Get all participants
-router.get('/:id', getParticipantById); // Get participant by ID
 router.put('/:id', updateParticipant); // Update participant by ID
 router.delete('/:id', deleteParticipant); // Delete participant by ID
 router.post('/register-hackathon', participateInHackathon);

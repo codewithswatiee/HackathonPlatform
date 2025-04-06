@@ -91,6 +91,10 @@ const participantSchema = new mongoose.Schema({
     resume: {
         type: String,
     },
+    registeredHackathons: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Hackathon'
+    }],
 });
 
 // Index for faster queries

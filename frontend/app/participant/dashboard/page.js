@@ -212,6 +212,49 @@ const ParticipantDashboard = () => {
     }
   }, [scrollY]);
 
+  const [registeredHackathons] = useState([
+    {
+      _id: "67f15729ae927329ce3d6600",
+      name: "Tech Innovators Hackathon 2024",
+      description: "A 48-hour hackathon focused on creating innovative solutions for real-world problems using cutting-edge technologies.",
+      theme: "Sustainable Technology Solutions",
+      startDate: "2025-05-01T09:00:00.000Z",
+      endDate: "2025-05-02T17:00:00.000Z",
+      registrationStartDate: "2025-04-01T00:00:00.000Z",
+      registrationEndDate: "2025-04-10T23:59:59.000Z",
+      duration: "48 hours",
+      time: {
+        startTime: "09:00 AM",
+        endTime: "05:00 PM"
+      },
+      location: {
+        type: "online"
+      },
+      registrationFee: 100,
+      prizePool: 10000,
+      prizeDistribution: [
+        { position: "First Prize", amount: 5000 },
+        { position: "Second Prize", amount: 3000 },
+        { position: "Third Prize", amount: 2000 }
+      ],
+      domains: [
+        "Web Development",
+        "Mobile Development",
+        "AI/ML",
+        "Blockchain",
+        "IoT",
+        "AR/VR"
+      ],
+      maxTeamSize: 4,
+      minTeamSize: 2,
+      status: "upcoming"
+    }
+  ]);
+
+  const handleHackathonClick = (hackathonId) => {
+    router.push(`/participant/hackathon/67f15729ae927329ce3d6600/team-details`);
+  };
+
   return (
     <div className="min-h-screen bg-black text-white py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
@@ -656,93 +699,176 @@ const ParticipantDashboard = () => {
           </button>
         </div>
 
-        {/* Hackathon Cards */}
-        <motion.div 
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
-        >
-          {filteredHackathons.map((hackathon) => (
-            <motion.div
-              key={hackathon.id}
-              variants={itemVariants}
-              whileHover={{ scale: 1.03, boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.5)" }}
-              className="bg-zinc-900 overflow-hidden rounded-lg border border-zinc-800 hover:border-white transition-all duration-300"
-            >
-              <div className="p-6">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-semibold">{hackathon.title}</h3>
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                    hackathon.status === 'upcoming' ? 'bg-yellow-900 text-yellow-300' :
-                    hackathon.status === 'active' ? 'bg-green-900 text-green-300' :
-                    'bg-red-900 text-red-300'
-                  }`}>
-                    {hackathon.status.charAt(0).toUpperCase() + hackathon.status.slice(1)}
-                  </span>
-                </div>
-                
-                <div className="mt-4 flex items-center justify-between">
-                  <div className="flex items-center text-sm text-zinc-400">
-                    <svg className="flex-shrink-0 mr-1.5 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    {new Date(hackathon.startDate).toLocaleDateString()}
-                  </div>
-                  <div className="flex items-center text-sm text-zinc-400">
-                    <svg className="flex-shrink-0 mr-1.5 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    {hackathon.location}
-                  </div>
-                </div>
-                
-                <p className="mt-4 text-zinc-400">{hackathon.description}</p>
-                
-                <div className="mt-4 grid grid-cols-3 gap-2 text-center">
-                  <div className="bg-zinc-800 rounded-md p-2">
-                    <div className="text-lg font-bold">₹{hackathon.registrationFee}</div>
-                    <div className="text-xs text-zinc-400">Entry Fee</div>
-                  </div>
-                  <div className="bg-zinc-800 rounded-md p-2">
-                    <div className="text-lg font-bold">₹{hackathon.points}</div>
-                    <div className="text-xs text-zinc-400">Prize Pool</div>
-                  </div>
-                  <div className="bg-zinc-800 rounded-md p-2">
-                    <div className="text-lg font-bold">{hackathon.duration}</div>
-                    <div className="text-xs text-zinc-400">Duration</div>
-                  </div>
-                </div>
-                
-                <div className="mt-4">
-                  <div className="text-sm text-zinc-400 mb-2">Domains:</div>
-                  <div className="flex flex-wrap gap-2">
-                    {hackathon.domains.map((domain, index) => (
-                      <span key={index} className="px-2 py-1 bg-zinc-800 rounded-full text-xs">
-                        {domain}
+        {/* Registered Hackathons */}
+        {activeTab === 'registered' && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-6"
+          >
+            {registeredHackathons.map((hackathon) => (
+              <motion.div
+                key={hackathon._id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                whileHover={{ scale: 1.02 }}
+                onClick={() => handleHackathonClick(hackathon._id)}
+                className="bg-zinc-900 rounded-xl p-6 border border-zinc-800 cursor-pointer hover:border-blue-500 transition-colors"
+              >
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div>
+                    <h3 className="text-xl font-bold mb-2">{hackathon.name}</h3>
+                    <p className="text-zinc-400 mb-4">{hackathon.description}</p>
+                    <div className="flex flex-wrap gap-2">
+                      <span className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-sm">
+                        {hackathon.theme}
                       </span>
-                    ))}
+                      <span className="px-3 py-1 bg-zinc-800 text-zinc-300 rounded-full text-sm">
+                        {hackathon.duration}
+                      </span>
+                      <span className="px-3 py-1 bg-zinc-800 text-zinc-300 rounded-full text-sm capitalize">
+                        {hackathon.location.type}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-2xl font-bold text-blue-400 mb-2">
+                      ₹{hackathon.prizePool}
+                    </div>
+                    <p className="text-zinc-400">Prize Pool</p>
                   </div>
                 </div>
-                
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => router.push(`/participant/hackathon/${hackathon.id}`, {
-                    state: { hackathonId: hackathon.id }
-                  })}
-                  className="mt-6 w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-black bg-white hover:bg-zinc-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-black focus:ring-white"
-                >
-                  View Details
-                </motion.button>
-              </div>
-            </motion.div>
-          ))}
-        </motion.div>
+                <div className="mt-6 pt-6 border-t border-zinc-800">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <p className="text-sm text-zinc-400">Start Date</p>
+                      <p className="font-medium">
+                        {new Date(hackathon.startDate).toLocaleDateString()} at {hackathon.time.startTime}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-zinc-400">End Date</p>
+                      <p className="font-medium">
+                        {new Date(hackathon.endDate).toLocaleDateString()} at {hackathon.time.endTime}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-zinc-400">Team Size</p>
+                      <p className="font-medium">
+                        {hackathon.minTeamSize}-{hackathon.maxTeamSize} members
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
+
+        {/* Completed Hackathons */}
+        {activeTab === 'completed' && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center py-12"
+          >
+            <svg className="mx-auto h-16 w-16 text-zinc-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <h3 className="mt-2 text-lg font-medium">No Hackathons Completed Yet</h3>
+            <p className="mt-1 text-zinc-400">Your completed hackathons will appear here.</p>
+          </motion.div>
+        )}
+
+        {/* Hackathon Cards - Only show in upcoming tab */}
+        {activeTab === 'upcoming' && (
+          <motion.div 
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
+          >
+            {filteredHackathons.map((hackathon) => (
+              <motion.div
+                key={hackathon.id}
+                variants={itemVariants}
+                whileHover={{ scale: 1.03, boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.5)" }}
+                className="bg-zinc-900 overflow-hidden rounded-lg border border-zinc-800 hover:border-white transition-all duration-300"
+              >
+                <div className="p-6">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-xl font-semibold">{hackathon.title}</h3>
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                      hackathon.status === 'upcoming' ? 'bg-yellow-900 text-yellow-300' :
+                      hackathon.status === 'active' ? 'bg-green-900 text-green-300' :
+                      'bg-red-900 text-red-300'
+                    }`}>
+                      {hackathon.status.charAt(0).toUpperCase() + hackathon.status.slice(1)}
+                    </span>
+                  </div>
+                  
+                  <div className="mt-4 flex items-center justify-between">
+                    <div className="flex items-center text-sm text-zinc-400">
+                      <svg className="flex-shrink-0 mr-1.5 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      {new Date(hackathon.startDate).toLocaleDateString()}
+                    </div>
+                    <div className="flex items-center text-sm text-zinc-400">
+                      <svg className="flex-shrink-0 mr-1.5 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      {hackathon.location}
+                    </div>
+                  </div>
+                  
+                  <p className="mt-4 text-zinc-400">{hackathon.description}</p>
+                  
+                  <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+                    <div className="bg-zinc-800 rounded-md p-2">
+                      <div className="text-lg font-bold">₹{hackathon.registrationFee}</div>
+                      <div className="text-xs text-zinc-400">Entry Fee</div>
+                    </div>
+                    <div className="bg-zinc-800 rounded-md p-2">
+                      <div className="text-lg font-bold">₹{hackathon.points}</div>
+                      <div className="text-xs text-zinc-400">Prize Pool</div>
+                    </div>
+                    <div className="bg-zinc-800 rounded-md p-2">
+                      <div className="text-lg font-bold">{hackathon.duration}</div>
+                      <div className="text-xs text-zinc-400">Duration</div>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-4">
+                    <div className="text-sm text-zinc-400 mb-2">Domains:</div>
+                    <div className="flex flex-wrap gap-2">
+                      {hackathon.domains.map((domain, index) => (
+                        <span key={index} className="px-2 py-1 bg-zinc-800 rounded-full text-xs">
+                          {domain}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => router.push(`/participant/hackathon/${hackathon.id}`, {
+                      state: { hackathonId: hackathon.id }
+                    })}
+                    className="mt-6 w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-black bg-white hover:bg-zinc-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-black focus:ring-white"
+                  >
+                    View Details
+                  </motion.button>
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
         
-        {/* Empty State */}
-        {filteredHackathons.length === 0 && (
+        {/* Empty State for Upcoming Hackathons */}
+        {activeTab === 'upcoming' && filteredHackathons.length === 0 && (
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -751,8 +877,8 @@ const ParticipantDashboard = () => {
             <svg className="mx-auto h-16 w-16 text-zinc-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <h3 className="mt-2 text-lg font-medium">No hackathons found</h3>
-            <p className="mt-1 text-zinc-400">Try changing your filters or check back later.</p>
+            <h3 className="mt-2 text-lg font-medium">No upcoming hackathons found</h3>
+            <p className="mt-1 text-zinc-400">Check back later for new hackathons.</p>
           </motion.div>
         )}
       </div>

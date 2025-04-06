@@ -27,6 +27,8 @@ const login = async (req, res) => {
             { expiresIn: '3d' } // Token expiration (3 days)
         );
 
+        console.log(user)
+
         res.status(200).json({
             success: true,
             message: 'Login successful',
