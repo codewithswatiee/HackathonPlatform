@@ -1,7 +1,6 @@
 "use client"
 
 import axios from "axios"
-import Head from "next/head"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 
@@ -53,18 +52,17 @@ export default function OrganizerRegistration() {
   }
 
   return (
-    <>
-      <Head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Lilita+One&display=swap" rel="stylesheet" />
-      </Head>
+    <main className="min-h-screen bg-zinc-900 font-['Lilita_One']">
+      {/* Google Fonts Import */}
+      <style jsx global>{`
+        @import url('https://fonts.googleapis.com/css2?family=Lilita+One&display=swap');
+      `}</style>
       
-      <div className="flex items-center justify-center min-h-screen bg-zinc-900 py-8 px-6" style={{ fontFamily: '"Lilita One", cursive' }}>
+      <div className="flex items-center justify-center min-h-screen py-8 px-6">
         <div className="w-full max-w-4xl bg-zinc-800 rounded-2xl shadow-xl p-8">
           <div className="text-center mb-6">
-            <h2 className="text-3xl font-normal text-white tracking-wide">ORGANIZER REGISTRATION</h2>
-            <p className="mt-2 text-gray-300 text-sm">Create your account to start hosting hackathons</p>
+            <h2 className="text-3xl text-white tracking-tight">ORGANIZER REGISTRATION</h2>
+            <p className="mt-2 text-gray-300 text-sm font-sans">Create your account to start hosting hackathons</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -222,7 +220,7 @@ export default function OrganizerRegistration() {
                 <button
                   type="submit"
                   onClick={handleSubmit}
-                  className="w-full py-3 rounded-full bg-white text-[#e74c3c] text-xl font-normal hover:bg-gray-100 focus:outline-none transition-all"
+                  className="w-full py-3 rounded-full bg-white text-[#e74c3c] text-xl hover:bg-gray-100 focus:outline-none transition-all"
                 >
                   SIGN UP
                 </button>
@@ -231,6 +229,6 @@ export default function OrganizerRegistration() {
           </form>
         </div>
       </div>
-    </>
+    </main>
   )
 } 
